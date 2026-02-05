@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-02-04T18:13:04.590767",
+  "total_sequences": 198,
+  "by_category": {
+    "short": 198
+  },
+  "by_subject": {
+    "Physics": 86,
+    "Chemistry": 93,
+    "Biology": 19
+  },
+  "input_token_stats": {
+    "min": 84.0,
+    "max": 2811.0,
+    "mean": 258.5151515151515,
+    "std": 214.4493942628995,
+    "p50": 223.0,
+    "p90": 382.6,
+    "p99": 804.1200000000001
+  },
+  "estimated_output_stats": {
+    "min": 128.0,
+    "max": 128.0,
+    "mean": 128.0,
+    "std": 0.0,
+    "p50": 128.0,
+    "p90": 128.0,
+    "p99": 128.0
+  },
+  "thresholds": {
+    "short": 12560,
+    "medium": 26120,
+    "long": 32768
+  }
+}

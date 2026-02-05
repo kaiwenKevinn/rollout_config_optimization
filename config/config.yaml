@@ -1,0 +1,177 @@
+# Heterogeneous TP Configuration Testing Framework Configuration
+# 变长序列异构配置测试框架配置文件
+
+# Model Configuration
+model:
+  name: "/mnt/data1/kwchen/hugging_face_model/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137"
+  # name: "/mnt/data1/kwchen/hugging_face_model/Qwen/Qwen2.5-14B-Instruct/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
+  # Alternative local path: /path/to/local/model
+  max_model_len: 32684
+  dtype: "auto"
+  trust_remote_code: true
+  enable_thinking: true
+  # GPU memory utilization per instance
+  gpu_memory_utilization: 0.90
+
+# Dataset Configuration
+dataset:
+  name: "Idavidrein/gpqa"
+  subset: "gpqa_diamond"
+  split: "train"
+  cache_dir: "./datasets"
+  # Maximum number of samples to use (null for all)
+  max_samples: null
+
+# GPU Configuration
+gpu:
+  total_gpus: 3
+  # GPU IDs available for allocation
+  available_gpus: [0, 1, 3]
+
+# Tensor Parallelism Configurations
+tp_configs:
+  # Homogeneous configurations to test
+  homogeneous:
+    - tp: 1
+      instances: 3
+      description: "3 instances with TP=1"
+    - tp: 2
+      instances: 1
+      description: "1 instance with TP=2"
+    - tp: 4
+      instances: 1
+      description: "1 instances with TP=4"
+  
+  # Heterogeneous configuration
+  heterogeneous:
+    - instance_id: "hetero_tp2_0"
+      tp: 2
+      gpus: [0, 1]
+      description: "TP=2 instance for medium sequences"
+    - instance_id: "hetero_tp1_0"
+      tp: 1
+      gpus: [2]
+      description: "TP=1 instance for short sequences"
+    - instance_id: "hetero_tp1_1"
+      tp: 1
+      gpus: [3]
+      description: "TP=1 instance for short sequences"
+
+# Scheduling Configuration
+scheduling:
+  # Sequence length thresholds for input-only classification (pre-inference)
+  length_thresholds:
+    short: 5000      # input sequences <= 12560 tokens
+    medium: 10000     # input sequences 12561-26120 tokens
+    long: 15000       # input sequences > 26120 tokens
+  
+  # Total sequence length thresholds for post-inference classification
+  # Used for routing decisions after actual output length is known
+  # These are larger since they include both input + output tokens
+  total_length_thresholds:
+    short: 5384      # total sequences <= 16384 tokens
+    medium: 12168     # total sequences 16385-32768 tokens  
+    long: 15152       # total sequences > 32768 tokens
+  
+  # Routing rules: sequence category -> preferred TP degrees
+  routing_rules:
+    short: [1, 2]       # Short sequences prefer TP=1 or TP=2
+    medium: [2, 4]      # Medium sequences prefer TP=2 or TP=4
+    long: [4]           # Long sequences prefer TP=4
+    extra_long: [4]     # Extra long sequences require TP=4
+  
+  # Load balancing strategy: "round_robin", "least_connections", "weighted"
+  load_balance_strategy: "least_connections"
+  
+  # Maximum queue length per instance
+  max_queue_length: 100
+  
+  # Request timeout in seconds
+  request_timeout: 300
+
+# Benchmark Configuration
+benchmark:
+  # Number of runs per scenario for averaging
+  num_runs: 2
+  
+  # Random seed for reproducibility
+  random_seed: 42
+  
+  # Number of warmup requests before actual benchmark
+  warmup_requests: 5
+  
+  # Maximum concurrent requests during benchmark
+  max_concurrent_requests: 4  # 减少并发以避免超时
+  
+  # Request rate limit (requests per second, null for unlimited)
+  request_rate_limit: null
+  
+  # Output token generation parameters
+  generation:
+    max_new_tokens: 20000    
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    min_p: 0
+
+# vLLM Server Configuration
+vllm_server:
+  # Base port for vLLM instances (each instance uses base_port + instance_index)
+  base_port: 8000
+  
+  # Host address
+  host: "127.0.0.1"
+  
+  # Server startup timeout in seconds
+  startup_timeout: 300
+  
+  # Health check interval in seconds
+  health_check_interval: 5
+  
+  # API type: "openai" or "generate"
+  api_type: "openai"
+
+# Metrics Collection Configuration
+metrics:
+  # Metrics to collect
+  collect:
+    - input_tokens
+    - output_tokens
+    - ttft          # Time to first token
+    - tpot          # Time per output token
+    - total_latency
+    - gpu_memory_used
+    - gpu_utilization
+    - throughput
+  
+  # GPU monitoring interval in seconds
+  gpu_monitor_interval: 0.5
+  
+  # Save intermediate results
+  save_intermediate: true
+
+# Results Configuration
+results:
+  # Base directory for results
+  output_dir: "./results"
+  
+  # Timestamp format for result directories
+  timestamp_format: "%Y%m%d_%H%M%S"
+  
+  # Save formats
+  formats:
+    - json
+    - csv
+  
+  # Generate plots
+  generate_plots: true
+  
+  # Generate markdown report
+  generate_report: true
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/benchmark.log"
+  console: true
