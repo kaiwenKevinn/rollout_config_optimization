@@ -19,7 +19,11 @@ import yaml
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.profiler.dataset_loader import GPQADatasetLoader
+from src.profiler.dataset_loader import (
+    GPQADatasetLoader,
+    AIME25DatasetLoader,
+    load_dataset_by_type
+)
 from src.profiler.sequence_profiler import SequenceProfiler
 from src.benchmark.runner import BenchmarkRunner
 from src.benchmark.scenarios import (
@@ -32,6 +36,7 @@ from src.benchmark.scenarios import (
 )
 from src.analysis.aggregator import MetricsAggregator
 from src.analysis.report_generator import ReportGenerator
+from src.utils.profiling_loader import ProfilingResultsLoader, create_adaptive_scenarios_from_profiling
 
 
 def setup_logging(log_level: str = "INFO", log_file: str = None):
@@ -60,28 +65,57 @@ async def run_heterogeneous_benchmark(
     config: dict,
     scenarios: list,
     output_dir: str,
-    num_runs: int = 3
+    num_runs: int = 3,
+    profiling_dir: str = None,
+    save_vllm_logs: bool = True,
+    exclude_tp1: bool = False
 ):
-    """Run heterogeneous benchmarks for specified scenarios."""
+    """Run heterogeneous benchmarks for specified scenarios.
+    
+    Args:
+        config: Configuration dictionary
+        scenarios: List of scenario configurations
+        output_dir: Output directory for results
+        num_runs: Number of runs per scenario
+        profiling_dir: Directory containing profiling results for adaptive configuration
+    """
     logger = logging.getLogger(__name__)
     
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+    
+    # 如果提供了profiling目录，则使用自适应配置
+    adaptive_configs = None
+    if profiling_dir and Path(profiling_dir).exists():
+        logger.info(f"Loading profiling results from: {profiling_dir}")
+        try:
+            profiling_loader = ProfilingResultsLoader(profiling_dir)
+            profiling_loader.print_analysis_report()
+            
+            # 基于profiling结果创建自适应场景
+            _, adaptive_heterogeneous = create_adaptive_scenarios_from_profiling(
+                profiling_dir, 
+                config.get("gpu", {}).get("total_gpus", 8),
+                exclude_tp1=exclude_tp1
+            )
+            adaptive_configs = adaptive_heterogeneous
+            
+            logger.info(f"Created {len(adaptive_configs)} adaptive heterogeneous configurations")
+            for cfg in adaptive_configs:
+                logger.info(f"  - {cfg['name']}: {cfg['description']}")
+                
+        except Exception as e:
+            logger.warning(f"Failed to load profiling results: {e}")
+            logger.warning("Falling back to predefined scenarios")
     
     # Load dataset
     logger.info("=" * 60)
     logger.info("Loading dataset...")
     logger.info("=" * 60)
     
-    dataset_config = config.get("dataset", {})
-    loader = GPQADatasetLoader(
-        dataset_name=dataset_config.get("name", "Idavidrein/gpqa"),
-        subset=dataset_config.get("subset", "gpqa_diamond"),
-        split=dataset_config.get("split", "train"),
-        cache_dir=dataset_config.get("cache_dir"),
-        max_samples=dataset_config.get("max_samples")
-    )
-    loader.load()
+    # Use the factory function to load appropriate dataset
+    loader = load_dataset_by_type(config)
+    questions = loader.get_questions()
     
     # Profile sequences
     logger.info("\n" + "=" * 60)
@@ -106,6 +140,12 @@ async def run_heterogeneous_benchmark(
         logger.info(f"  {cat}: {len(seqs)} sequences")
     
     # Create benchmark runner
+    # Add vLLM log directory to config if needed
+    if save_vllm_logs:
+        vllm_log_dir = str(output_path / "vllm_logs")
+        config.setdefault("vllm_server", {})["log_dir"] = vllm_log_dir
+        logger.info(f"vLLM logs will be saved to: {vllm_log_dir}")
+    
     runner = BenchmarkRunner(
         config=config,
         dataset_loader=loader,
@@ -115,8 +155,36 @@ async def run_heterogeneous_benchmark(
     
     benchmark_config = config.get("benchmark", {})
     
+    # 决定要运行的场景
+    scenarios_to_run = []
+    
+    if adaptive_configs:
+        # 使用自适应配置创建场景
+        logger.info("\n" + "=" * 60)
+        logger.info("Using Adaptive Configurations from Profiling Results")
+        logger.info("=" * 60)
+        
+        for cfg in adaptive_configs:
+            scenario = create_custom_heterogeneous_scenario(
+                instance_configs=cfg["instances"],
+                name=cfg["name"],
+                description=cfg["description"],
+                length_thresholds=cfg.get("length_thresholds"),
+                routing_rules=cfg.get("routing_rules"),
+                num_runs=num_runs,
+                warmup_requests=benchmark_config.get("warmup_requests", 5),
+                max_concurrent_requests=benchmark_config.get("max_concurrent_requests", 32)
+            )
+            scenarios_to_run.append(scenario)
+    else:
+        # 使用预定义场景
+        logger.info("\n" + "=" * 60)
+        logger.info("Using Predefined Scenarios")
+        logger.info("=" * 60)
+        scenarios_to_run = scenarios
+    
     # Run benchmarks for each scenario
-    for scenario in scenarios:
+    for scenario in scenarios_to_run:
         logger.info("\n" + "=" * 60)
         logger.info(f"Running Heterogeneous Scenario: {scenario.name}")
         logger.info("=" * 60)
@@ -234,6 +302,12 @@ def main():
         help="Scenarios to run: all, mix1, mix2, mix3 (default: all)"
     )
     parser.add_argument(
+        "--profiling-dir", "-p",
+        type=str,
+        default=None,
+        help="Directory containing profiling results for adaptive configuration"
+    )
+    parser.add_argument(
         "--runs", "-n",
         type=int,
         default=3,
@@ -257,6 +331,24 @@ def main():
         type=str,
         default=None,
         help="Log file path (optional)"
+    )
+    parser.add_argument(
+        "--save-vllm-logs",
+        action="store_true",
+        default=True,
+        help="Save vLLM instance logs to files (default: True)"
+    )
+    parser.add_argument(
+        "--no-save-vllm-logs",
+        dest="save_vllm_logs",
+        action="store_false",
+        help="Do not save vLLM instance logs"
+    )
+    parser.add_argument(
+        "--exclude-tp1",
+        action="store_true",
+        default=False,
+        help="Exclude TP=1 configurations when using adaptive mode"
     )
     
     args = parser.parse_args()
@@ -305,6 +397,8 @@ def main():
     logger.info(f"Scenarios to run: {[s.name for s in scenarios]}")
     logger.info(f"Runs per scenario: {args.runs}")
     logger.info(f"Output directory: {args.output}")
+    if args.profiling_dir:
+        logger.info(f"Profiling directory: {args.profiling_dir}")
     
     scheduling_config = config.get("scheduling", {})
     logger.info(f"Length thresholds: {scheduling_config.get('length_thresholds', {})}")
@@ -318,7 +412,10 @@ def main():
             config=config,
             scenarios=scenarios,
             output_dir=str(output_dir),
-            num_runs=args.runs
+            num_runs=args.runs,
+            profiling_dir=args.profiling_dir,
+            save_vllm_logs=args.save_vllm_logs,
+            exclude_tp1=args.exclude_tp1
         ))
         
         logger.info("\n" + "=" * 60)

@@ -1,0 +1,558 @@
+nohup: ignoring input
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+2026-02-06 14:55:39,739 - __main__ - INFO - ============================================================
+2026-02-06 14:55:39,739 - __main__ - INFO - Homogeneous TP Benchmark Configuration
+2026-02-06 14:55:39,739 - __main__ - INFO - ============================================================
+2026-02-06 14:55:39,740 - __main__ - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137
+2026-02-06 14:55:39,740 - __main__ - INFO - Total GPUs: 8
+2026-02-06 14:55:39,741 - __main__ - INFO - TP Degrees to test: [2, 4]
+2026-02-06 14:55:39,741 - __main__ - INFO - Runs per scenario: 2
+2026-02-06 14:55:39,741 - __main__ - INFO - Output directory: results/test_homo
+2026-02-06 14:55:39,741 - __main__ - INFO - Profiling directory: results/aime25_test
+2026-02-06 14:55:39,743 - __main__ - INFO - Loading profiling results from: results/aime25_test
+2026-02-06 14:55:39,750 - src.utils.profiling_loader - INFO - Optimized thresholds based on actual data:
+2026-02-06 14:55:39,750 - src.utils.profiling_loader - INFO -   short: <= 6000 tokens
+2026-02-06 14:55:39,751 - src.utils.profiling_loader - INFO -   medium: <= 12000 tokens
+2026-02-06 14:55:39,751 - src.utils.profiling_loader - INFO -   long: > 12000 tokens
+2026-02-06 14:55:39,752 - __main__ - INFO - Created 2 adaptive homogeneous configurations
+2026-02-06 14:55:39,753 - __main__ - INFO -   - TP=2: 2 instances - Optimized for medium sequences (4 sequences)
+2026-02-06 14:55:39,753 - __main__ - INFO -   - TP=4: 1 instances - Optimized for long sequences (2 sequences)
+2026-02-06 14:55:39,754 - __main__ - INFO - ============================================================
+2026-02-06 14:55:39,754 - __main__ - INFO - Loading dataset...
+2026-02-06 14:55:39,755 - __main__ - INFO - ============================================================
+2026-02-06 14:55:39,755 - src.profiler.dataset_loader - INFO - Loading AIME 25 dataset: opencompass/AIME2025
+2026-02-06 14:55:39,756 - src.profiler.dataset_loader - INFO - Loading from cache: datasets/aime25_AIME2025-I_test_processed.json
+2026-02-06 14:55:39,758 - __main__ - INFO - 
+============================================================
+2026-02-06 14:55:39,758 - __main__ - INFO - Profiling sequences...
+2026-02-06 14:55:39,758 - __main__ - INFO - ============================================================
+2026-02-06 14:55:39,759 - src.profiler.sequence_profiler - INFO - Profiling 15 questions
+
+================================================================================
+PROFILING RESULTS ANALYSIS REPORT
+================================================================================
+
+Dataset Summary:
+  Total Questions: 15
+  Average Question Length: 348.1 chars
+  Length Range: 84 - 640 chars
+  Problem Types: {'other': 15}
+
+Sequence Analysis (Input-based):
+  Total Sequences: 15
+  Completed: 15
+  Input Thresholds: short<=5000, medium<=10000, long<=15000
+
+Sequence Analysis (Total-based, including output):
+  Total Thresholds: short<=6000, medium<=12000, long<=18000
+
+Distribution by Input Category:
+  short       :  15 (100.0%)
+
+Distribution by Total Category (Input + Output):
+  extra_long  :   6 ( 40.0%)
+  long        :   2 ( 13.3%)
+  medium      :   4 ( 26.7%)
+  short       :   3 ( 20.0%)
+
+Input Token Statistics:
+  Min:     53  Max:    263  Mean:  130.8
+  P50:    123  P90:    198  P99:    257
+
+Actual Total Token Statistics (Input + Output):
+  Min:   3063  Max:  20221  Mean: 13244.7
+  P50:  12963  P90:  20136  P99:  20210
+================================================================================
+Profiling sequences:   0%|          | 0/15 [00:00<?, ?it/s]2026-02-06 14:55:39,763 - src.profiler.sequence_profiler - INFO - Loading tokenizer: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137
+Profiling sequences:   7%|▋         | 1/15 [00:00<00:05,  2.44it/s]Profiling sequences: 100%|██████████| 15/15 [00:00<00:00, 36.05it/s]
+2026-02-06 14:55:40,180 - src.profiler.sequence_profiler - INFO - Profiled 15 sequences
+2026-02-06 14:55:40,181 - __main__ - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs
+2026-02-06 14:55:40,182 - src.benchmark.runner - INFO - BenchmarkRunner initialized with 15 sequences
+2026-02-06 14:55:40,183 - __main__ - INFO - 
+============================================================
+2026-02-06 14:55:40,183 - __main__ - INFO - Using Adaptive Configurations from Profiling Results
+2026-02-06 14:55:40,184 - __main__ - INFO - ============================================================
+2026-02-06 14:55:40,185 - __main__ - INFO - 
+============================================================
+2026-02-06 14:55:40,186 - __main__ - INFO - Running Homogeneous TP=2 Benchmark
+2026-02-06 14:55:40,187 - __main__ - INFO - Configuration: Optimized for medium sequences (4 sequences)
+2026-02-06 14:55:40,188 - __main__ - INFO - ============================================================
+2026-02-06 14:55:40,189 - src.benchmark.runner - INFO - Starting scenario: custom_homogeneous_tp2
+2026-02-06 14:55:40,191 - src.benchmark.runner - INFO -   Type: homogeneous
+2026-02-06 14:55:40,192 - src.benchmark.runner - INFO -   Instances: 4
+2026-02-06 14:55:40,192 - src.benchmark.runner - INFO -   Runs: 2
+2026-02-06 14:55:40,197 - src.benchmark.runner - INFO - 
+==================================================
+2026-02-06 14:55:40,197 - src.benchmark.runner - INFO - Starting run 1/2
+2026-02-06 14:55:40,198 - src.benchmark.runner - INFO - ==================================================
+2026-02-06 14:55:40,199 - src.instance_manager.gpu_allocator - INFO - GPU Allocator initialized: 8 GPUs, 8 available
+2026-02-06 14:55:40,200 - src.scheduler.homogeneous - INFO - Initialized HomogeneousScheduler: TP=2, strategy=least_connections
+2026-02-06 14:55:40,219 - src.benchmark.runner - INFO - Starting instance pool...
+2026-02-06 14:55:40,219 - src.instance_manager.instance_pool - INFO - Starting instance pool
+2026-02-06 14:55:40,220 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [0, 1] to instance custom_homo_tp2_0
+2026-02-06 14:55:40,221 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [2, 3] to instance custom_homo_tp2_1
+2026-02-06 14:55:40,223 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [4, 5] to instance custom_homo_tp2_2
+2026-02-06 14:55:40,224 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [6, 7] to instance custom_homo_tp2_3
+2026-02-06 14:55:40,225 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_0
+2026-02-06 14:55:40,226 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_0 on port 8000
+2026-02-06 14:55:40,227 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 14:55:40,228 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8000 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 14:55:40,230 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 0,1
+2026-02-06 14:55:40,234 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_0.log
+2026-02-06 14:55:52,293 - src.instance_manager.vllm_instance - INFO - Health check passed after 7 attempts
+2026-02-06 14:55:52,616 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_0 is ready
+2026-02-06 14:55:52,616 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_1
+2026-02-06 14:55:52,616 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_1 on port 8001
+2026-02-06 14:55:52,617 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 14:55:52,617 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8001 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 14:55:52,617 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 2,3
+2026-02-06 14:55:52,621 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_1.log
+2026-02-06 14:55:52,630 - src.instance_manager.vllm_instance - INFO - Health check passed after 1 attempts
+2026-02-06 14:55:52,734 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_1 is ready
+2026-02-06 14:55:52,734 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_2
+2026-02-06 14:55:52,734 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_2 on port 8002
+2026-02-06 14:55:52,735 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 14:55:52,735 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8002 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 14:55:52,736 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 4,5
+2026-02-06 14:55:52,738 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_2.log
+2026-02-06 14:56:20,853 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 14:56:50,986 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 14:57:11,085 - src.instance_manager.vllm_instance - INFO - Health check passed after 40 attempts
+2026-02-06 14:57:11,199 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_2 is ready
+2026-02-06 14:57:11,199 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_3
+2026-02-06 14:57:11,199 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_3 on port 8003
+2026-02-06 14:57:11,199 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 14:57:11,199 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8003 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 14:57:11,200 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 6,7
+2026-02-06 14:57:11,202 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_3.log
+2026-02-06 14:57:39,330 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 14:58:09,470 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 14:58:39,601 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (88s elapsed, 45 checks)
+2026-02-06 14:58:59,706 - src.instance_manager.vllm_instance - INFO - Health check passed after 55 attempts
+2026-02-06 14:58:59,867 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_3 is ready
+2026-02-06 14:58:59,867 - src.instance_manager.instance_pool - INFO - Instance pool started with 4 ready instances
+2026-02-06 14:58:59,869 - src.benchmark.runner - INFO - Running warmup (5 requests)...
+2026-02-06 14:58:59,889 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 14:58:59,892 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 14:58:59,895 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 14:58:59,898 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:01,051 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:02,054 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:03,058 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:04,141 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,298 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,299 - src.benchmark.runner - INFO - Warmup completed
+2026-02-06 14:59:05,300 - src.benchmark.runner - INFO - Running benchmark (15 requests)...
+
+============================================================
+Sequence Profiling Summary
+============================================================
+
+Total Sequences: 15
+Completed Sequences: 0
+
+Input Thresholds: short<=5000, medium<=10000, long<=15000
+Total Thresholds: short<=512, medium<=1024, long<=2048
+
+Distribution by Category (Input-based):
+  short       :   15 (100.0%)
+
+Input Token Statistics:
+  Min:  53
+  Max:  263
+  Mean: 130.8
+  Std:  52.1
+  P50:  123
+  P90:  198
+  P99:  257
+
+Distribution by Subject:
+  Other                         :   15 (100.0%)
+============================================================
+
+============================================================
+Scenario: custom_homogeneous_tp2
+============================================================
+Type: homogeneous
+Description: Custom homogeneous: 4 instances with TP=2
+
+Instances (4):
+  - custom_homo_tp2_0: TP=2, GPUs=[0, 1]
+    TP=2 instance 0
+  - custom_homo_tp2_1: TP=2, GPUs=[2, 3]
+    TP=2 instance 1
+  - custom_homo_tp2_2: TP=2, GPUs=[4, 5]
+    TP=2 instance 2
+  - custom_homo_tp2_3: TP=2, GPUs=[6, 7]
+    TP=2 instance 3
+
+Total GPUs: 8
+TP Distribution: {2: 4}
+
+Benchmark Settings:
+  Runs: 2
+  Warmup Requests: 5
+  Max Concurrent: 15
+============================================================
+
+============================================================
+Instance Pool Status
+============================================================
+State: running
+Total Instances: 4
+Ready: 4, Busy: 0, Error: 0
+Total Requests: 0, Failed: 0
+
+By TP Degree:
+  TP=2: 4/4 ready, 0 requests
+
+Instance Details:
+  VLLMInstance(id=custom_homo_tp2_0, tp=2, gpus=[0, 1], state=ready)
+  VLLMInstance(id=custom_homo_tp2_1, tp=2, gpus=[2, 3], state=ready)
+  VLLMInstance(id=custom_homo_tp2_2, tp=2, gpus=[4, 5], state=ready)
+  VLLMInstance(id=custom_homo_tp2_3, tp=2, gpus=[6, 7], state=ready)
+============================================================
+Benchmark progress:   0%|          | 0/15 [00:00<?, ?it/s]2026-02-06 14:59:05,343 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,347 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,349 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,349 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,350 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,356 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,362 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,373 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,374 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,374 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,375 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,375 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,375 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8003/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,376 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8003/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:05,377 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8003/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 14:59:29,906 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:29,910 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:29,914 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:29,919 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:59,928 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:59,934 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:59,937 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 14:59:59,941 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:00:29,950 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:00:29,957 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:00:29,963 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:00:29,969 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:   7%|▋         | 1/15 [01:37<22:51, 97.93s/it]2026-02-06 15:00:59,983 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:00:59,992 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:01:00,001 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:01:00,009 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  13%|█▎        | 2/15 [02:02<11:55, 55.04s/it]2026-02-06 15:01:30,022 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:01:30,039 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:01:30,049 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:01:30,059 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:00,074 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:00,091 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:00,099 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:00,106 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:30,113 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:30,116 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:30,120 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:02:30,122 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  20%|██        | 3/15 [03:42<15:02, 75.24s/it]Benchmark progress:  27%|██▋       | 4/15 [03:47<08:43, 47.62s/it]2026-02-06 15:03:00,130 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:03:00,135 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:03:00,140 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:03:00,146 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  33%|███▎      | 5/15 [04:21<07:08, 42.85s/it]2026-02-06 15:03:30,162 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:03:30,171 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:03:30,178 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:03:30,186 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:04:00,198 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:04:00,205 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:04:00,209 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:04:00,213 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  40%|████      | 6/15 [05:09<06:40, 44.46s/it]2026-02-06 15:04:30,219 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:04:30,225 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:04:30,228 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:04:30,233 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  47%|████▋     | 7/15 [05:45<05:32, 41.56s/it]2026-02-06 15:05:00,243 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:05:00,248 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:05:00,252 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:05:00,257 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:05:30,273 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:05:30,290 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:05:30,296 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:05:30,303 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:00,310 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:00,315 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:00,319 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:00,324 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:30,337 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:30,351 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:30,358 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:06:30,368 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:00,373 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:00,378 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:00,382 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:00,385 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:30,395 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:30,401 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:30,404 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:07:30,408 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:00,418 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:00,424 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:00,428 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:00,432 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:30,440 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:30,448 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:30,456 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:08:30,462 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  53%|█████▎    | 8/15 [09:29<11:39, 99.91s/it]Benchmark progress:  60%|██████    | 9/15 [09:54<07:38, 76.40s/it]2026-02-06 15:09:00,479 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:09:00,489 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:09:00,500 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:09:00,508 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:09:30,518 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:09:30,523 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:09:30,527 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:09:30,531 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  67%|██████▋   | 10/15 [10:26<05:13, 62.65s/it]2026-02-06 15:10:00,543 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:10:00,550 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:10:00,554 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:10:00,559 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  73%|███████▎  | 11/15 [11:19<03:59, 59.77s/it]2026-02-06 15:10:30,571 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:10:30,579 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:10:30,585 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:10:30,592 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  80%|████████  | 12/15 [11:33<02:17, 45.74s/it]Benchmark progress:  87%|████████▋ | 13/15 [11:46<01:11, 35.77s/it]2026-02-06 15:11:00,611 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:11:00,619 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:11:00,627 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:11:00,633 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:11:30,640 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:11:30,646 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:11:30,650 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:11:30,655 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:12:00,663 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:12:00,667 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:12:00,672 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:12:00,678 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  93%|█████████▎| 14/15 [12:56<00:46, 46.07s/it]2026-02-06 15:12:30,688 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:12:30,697 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:12:30,704 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:12:30,710 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:00,716 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:00,721 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:00,725 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:00,729 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:30,740 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:30,748 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:30,754 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:13:30,760 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:00,767 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:00,771 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:00,776 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:00,779 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:30,789 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:30,796 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:30,803 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:14:30,808 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:15:00,818 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:15:00,825 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:15:00,832 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:15:00,838 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress: 100%|██████████| 15/15 [16:16<00:00, 92.66s/it]Benchmark progress: 100%|██████████| 15/15 [16:16<00:00, 65.11s/it]
+2026-02-06 15:15:22,219 - src.benchmark.runner - INFO - Stopping instance pool...
+2026-02-06 15:15:22,220 - src.instance_manager.instance_pool - INFO - Stopping instance pool
+2026-02-06 15:15:29,922 - src.instance_manager.gpu_allocator - INFO - Released GPUs [0, 1] from instance custom_homo_tp2_0
+2026-02-06 15:15:29,923 - src.instance_manager.gpu_allocator - INFO - Released GPUs [2, 3] from instance custom_homo_tp2_1
+2026-02-06 15:15:29,924 - src.instance_manager.gpu_allocator - INFO - Released GPUs [4, 5] from instance custom_homo_tp2_2
+2026-02-06 15:15:29,925 - src.instance_manager.gpu_allocator - INFO - Released GPUs [6, 7] from instance custom_homo_tp2_3
+2026-02-06 15:15:29,926 - src.instance_manager.instance_pool - INFO - Instance pool stopped
+2026-02-06 15:15:29,937 - src.benchmark.runner - INFO - 
+==================================================
+2026-02-06 15:15:29,937 - src.benchmark.runner - INFO - Starting run 2/2
+2026-02-06 15:15:29,937 - src.benchmark.runner - INFO - ==================================================
+2026-02-06 15:15:29,938 - src.instance_manager.gpu_allocator - INFO - GPU Allocator initialized: 8 GPUs, 8 available
+2026-02-06 15:15:29,939 - src.scheduler.homogeneous - INFO - Initialized HomogeneousScheduler: TP=2, strategy=least_connections
+2026-02-06 15:15:29,940 - src.benchmark.runner - INFO - Starting instance pool...
+2026-02-06 15:15:29,941 - src.instance_manager.instance_pool - INFO - Starting instance pool
+2026-02-06 15:15:29,942 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [0, 1] to instance custom_homo_tp2_0
+2026-02-06 15:15:29,943 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [2, 3] to instance custom_homo_tp2_1
+2026-02-06 15:15:29,943 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [4, 5] to instance custom_homo_tp2_2
+2026-02-06 15:15:29,944 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [6, 7] to instance custom_homo_tp2_3
+2026-02-06 15:15:29,945 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_0
+2026-02-06 15:15:29,946 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_0 on port 8000
+2026-02-06 15:15:29,947 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 15:15:29,948 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8000 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 15:15:29,948 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 0,1
+2026-02-06 15:15:29,951 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_0.log
+2026-02-06 15:15:29,959 - src.instance_manager.vllm_instance - INFO - Health check passed after 1 attempts
+2026-02-06 15:15:30,070 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_0 is ready
+2026-02-06 15:15:30,070 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_1
+2026-02-06 15:15:30,070 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_1 on port 8001
+2026-02-06 15:15:30,071 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 15:15:30,071 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8001 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 15:15:30,072 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 2,3
+2026-02-06 15:15:30,075 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_1.log
+2026-02-06 15:15:30,078 - src.instance_manager.vllm_instance - INFO - Health check passed after 1 attempts
+2026-02-06 15:15:30,159 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_1 is ready
+2026-02-06 15:15:30,159 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_2
+2026-02-06 15:15:30,159 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_2 on port 8002
+2026-02-06 15:15:30,159 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 15:15:30,159 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8002 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 15:15:30,160 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 4,5
+2026-02-06 15:15:30,163 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_2.log
+2026-02-06 15:15:58,286 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 15:16:28,423 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 15:16:52,535 - src.instance_manager.vllm_instance - INFO - Health check passed after 42 attempts
+2026-02-06 15:16:52,687 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_2 is ready
+2026-02-06 15:16:52,687 - src.instance_manager.instance_pool - INFO - Starting instance custom_homo_tp2_3
+2026-02-06 15:16:52,687 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance custom_homo_tp2_3 on port 8003
+2026-02-06 15:16:52,687 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 32768
+2026-02-06 15:16:52,688 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8003 --host 127.0.0.1 --max-model-len 32768 --dtype auto --gpu-memory-utilization 0.75 --trust-remote-code --enforce-eager
+2026-02-06 15:16:52,690 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 6,7
+2026-02-06 15:16:52,700 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_homo/vllm_logs/vllm_custom_homo_tp2_3.log
+2026-02-06 15:17:20,843 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 15:17:50,979 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 15:18:21,116 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (88s elapsed, 45 checks)
+2026-02-06 15:18:51,232 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (119s elapsed, 60 checks)
+2026-02-06 15:18:53,253 - src.instance_manager.vllm_instance - INFO - Health check passed after 61 attempts
+2026-02-06 15:18:53,376 - src.instance_manager.vllm_instance - INFO - Instance custom_homo_tp2_3 is ready
+2026-02-06 15:18:53,376 - src.instance_manager.instance_pool - INFO - Instance pool started with 4 ready instances
+2026-02-06 15:18:53,376 - src.benchmark.runner - INFO - Running warmup (5 requests)...
+2026-02-06 15:18:53,388 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:18:53,392 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:18:53,397 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:18:53,402 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:18:54,529 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:55,555 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:56,570 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:57,556 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,538 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,539 - src.benchmark.runner - INFO - Warmup completed
+2026-02-06 15:18:58,539 - src.benchmark.runner - INFO - Running benchmark (15 requests)...
+
+============================================================
+Instance Pool Status
+============================================================
+State: running
+Total Instances: 4
+Ready: 4, Busy: 0, Error: 0
+Total Requests: 0, Failed: 0
+
+By TP Degree:
+  TP=2: 4/4 ready, 0 requests
+
+Instance Details:
+  VLLMInstance(id=custom_homo_tp2_0, tp=2, gpus=[0, 1], state=ready)
+  VLLMInstance(id=custom_homo_tp2_1, tp=2, gpus=[2, 3], state=ready)
+  VLLMInstance(id=custom_homo_tp2_2, tp=2, gpus=[4, 5], state=ready)
+  VLLMInstance(id=custom_homo_tp2_3, tp=2, gpus=[6, 7], state=ready)
+============================================================
+Benchmark progress:   0%|          | 0/15 [00:00<?, ?it/s]2026-02-06 15:18:58,560 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,563 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,565 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,567 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,567 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,568 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,568 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,569 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,591 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8003/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,593 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8003/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,593 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8003/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,596 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,599 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,602 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:18:58,604 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 15:19:23,410 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:19:23,415 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:19:23,423 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:19:23,429 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:19:53,438 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:19:53,445 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:19:53,454 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:19:53,462 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:   7%|▋         | 1/15 [01:12<16:49, 72.08s/it]Benchmark progress:  13%|█▎        | 2/15 [01:23<07:55, 36.58s/it]2026-02-06 15:20:23,471 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:20:23,477 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:20:23,487 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:20:23,494 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  20%|██        | 3/15 [01:45<05:55, 29.65s/it]2026-02-06 15:20:53,518 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:20:53,531 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:20:53,539 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:20:53,548 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  27%|██▋       | 4/15 [01:56<04:05, 22.32s/it]Benchmark progress:  33%|███▎      | 5/15 [02:12<03:21, 20.15s/it]Benchmark progress:  40%|████      | 6/15 [02:20<02:25, 16.14s/it]2026-02-06 15:21:23,569 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:21:23,582 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:21:23,594 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:21:23,603 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:21:53,616 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:21:53,621 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:21:53,625 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:21:53,631 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:23,646 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:23,657 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:23,667 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:23,682 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:53,691 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:53,695 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:53,699 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:22:53,708 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  47%|████▋     | 7/15 [03:55<05:35, 41.89s/it]2026-02-06 15:23:23,722 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:23:23,734 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:23:23,742 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:23:23,752 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:23:53,761 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:23:53,766 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:23:53,770 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:23:53,773 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  53%|█████▎    | 8/15 [05:01<05:46, 49.44s/it]2026-02-06 15:24:23,780 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:24:23,784 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:24:23,790 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:24:23,795 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:24:53,808 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:24:53,814 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:24:53,818 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:24:53,824 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:23,831 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:23,837 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:23,841 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:23,849 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:53,867 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:53,879 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:53,886 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:25:53,895 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  60%|██████    | 9/15 [07:23<07:50, 78.45s/it]2026-02-06 15:26:23,905 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:26:23,910 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:26:23,913 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:26:23,917 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:26:53,930 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:26:53,938 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:26:53,949 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:26:53,956 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:23,969 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:23,978 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:23,983 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:23,989 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:54,000 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:54,008 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:54,014 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:27:54,022 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:24,028 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:24,031 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:24,034 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:24,037 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:54,044 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:54,047 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:54,051 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:28:54,055 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:24,061 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:24,065 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:24,068 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:24,070 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:54,077 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:54,083 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:54,088 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:29:54,093 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  67%|██████▋   | 10/15 [11:07<10:15, 123.18s/it]2026-02-06 15:30:24,103 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:30:24,112 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:30:24,119 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:30:24,128 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"
+Benchmark progress:  73%|███████▎  | 11/15 [11:32<06:13, 93.35s/it] Benchmark progress:  80%|████████  | 12/15 [11:41<03:22, 67.53s/it]Benchmark progress:  87%|████████▋ | 13/15 [11:47<01:37, 48.86s/it]2026-02-06 15:30:54,139 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 15:30:54,147 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 15:30:54,155 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 15:30:54,161 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8003/health "HTTP/1.1 200 OK"

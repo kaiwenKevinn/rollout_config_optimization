@@ -45,6 +45,7 @@ class InstanceConfig:
     api_type: str = "openai"
     enforce_eager: bool = True  # Force eager mode to avoid context length issues
     extra_args: Dict[str, Any] = field(default_factory=dict)
+    log_dir: Optional[str] = None  # Directory to save vLLM logs
     
     def to_cmd_args(self) -> List[str]:
         args = [
@@ -122,6 +123,7 @@ class VLLMInstance:
         self._base_url = f"http://{self.host}:{self.port}"
         self._health_url = f"{self._base_url}/health"
         self._completions_url = f"{self._base_url}/v1/completions"
+        self._log_file: Optional[Any] = None  # File handle for vLLM logs
     
     @property
     def state(self) -> InstanceState:
@@ -158,11 +160,24 @@ class VLLMInstance:
             cmd = [sys.executable, "-m", "vllm.entrypoints.openai.api_server"] + self.config.to_cmd_args()
             
             logger.info(f"Command: {' '.join(cmd)}")
-            logger.info(f"CUDA_VISIBLE_DEVICES: {env['CUDA_VISIBLE_DEVICES']}")            
+            logger.info(f"CUDA_VISIBLE_DEVICES: {env['CUDA_VISIBLE_DEVICES']}")
+            
+            # Setup log file if log_dir is specified
+            if self.config.log_dir:
+                os.makedirs(self.config.log_dir, exist_ok=True)
+                log_file_path = os.path.join(self.config.log_dir, f"vllm_{self.instance_id}.log")
+                self._log_file = open(log_file_path, "w")
+                logger.info(f"vLLM logs will be saved to: {log_file_path}")
+                stdout_target = self._log_file
+                stderr_target = subprocess.STDOUT  # Merge stderr into stdout
+            else:
+                stdout_target = subprocess.PIPE
+                stderr_target = subprocess.PIPE
+            
             self._process = subprocess.Popen(
                 cmd, env=env, 
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, 
+                stdout=stdout_target,
+                stderr=stderr_target, 
                 text=True
             )
             
@@ -172,7 +187,7 @@ class VLLMInstance:
                 self._http_client = httpx.AsyncClient(
                     timeout=httpx.Timeout(
                         connect=30.0,      # 连接超时
-                        read=6000.0,        # 读取超时（10分钟，适合长生成）
+                        read=6000.0,    # 读取超时
                         write=30.0,        # 写入超时
                         pool=30.0          # 连接池超时
                     )
@@ -252,6 +267,10 @@ class VLLMInstance:
                 self._process.kill()
                 self._process.wait()
             self._process = None
+        # Close log file if open
+        if self._log_file:
+            self._log_file.close()
+            self._log_file = None
         self._state = InstanceState.STOPPED
     
     async def health_check(self) -> bool:
@@ -384,6 +403,7 @@ def create_instance_from_config(instance_config: Dict[str, Any], model_config: D
         max_model_len=model_config.get("max_model_len", 8192),
         dtype=model_config.get("dtype", "auto"),
         trust_remote_code=model_config.get("trust_remote_code", True),
-        gpu_memory_utilization=model_config.get("gpu_memory_utilization", 0.90)
+        gpu_memory_utilization=model_config.get("gpu_memory_utilization", 0.90),
+        log_dir=server_config.get("log_dir", None)
     )
     return VLLMInstance(config)

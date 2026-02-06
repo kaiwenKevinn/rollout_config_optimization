@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-02-06T10:00:00",
+  "total_sequences": 150,
+  "completed_sequences": 150,
+  "by_category_input_based": {
+    "short": 90,
+    "medium": 45,
+    "long": 15
+  },
+  "by_category_total_based": {
+    "short": 89,
+    "medium": 45,
+    "long": 16
+  },
+  "input_token_stats": {
+    "min": 53,
+    "max": 847,
+    "mean": 234.5,
+    "p50": 189,
+    "p90": 567,
+    "p99": 789
+  },
+  "actual_output_stats": {
+    "min": 103,
+    "max": 18645,
+    "mean": 3997.2,
+    "p50": 2658,
+    "p90": 9876,
+    "p99": 16543
+  },
+  "actual_total_stats": {
+    "min": 156,
+    "max": 18745,
+    "mean": 4231.7,
+    "p50": 2847,
+    "p90": 10234,
+    "p99": 16789
+  },
+  "thresholds_input": {
+    "short": 5000,
+    "medium": 10000,
+    "long": 15000
+  },
+  "thresholds_total": {
+    "short": 5384,
+    "medium": 12168,
+    "long": 15152
+  }
+}

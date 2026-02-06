@@ -1,7 +1,8 @@
 {
-  "timestamp": "2026-02-04T18:13:04.590767",
+  "timestamp": "2026-02-05T17:08:40.128579",
   "total_sequences": 198,
-  "by_category": {
+  "completed_sequences": 198,
+  "by_category_input_based": {
     "short": 198
   },
   "by_subject": {
@@ -12,10 +13,10 @@
   "input_token_stats": {
     "min": 84.0,
     "max": 2811.0,
-    "mean": 258.5151515151515,
-    "std": 214.4493942628995,
+    "mean": 258.5,
+    "std": 214.44077494636124,
     "p50": 223.0,
-    "p90": 382.6,
+    "p90": 380.50000000000006,
     "p99": 804.1200000000001
   },
   "estimated_output_stats": {
@@ -27,9 +28,35 @@
     "p90": 128.0,
     "p99": 128.0
   },
-  "thresholds": {
-    "short": 12560,
-    "medium": 26120,
-    "long": 32768
+  "thresholds_input": {
+    "short": 5000,
+    "medium": 10000,
+    "long": 15000
+  },
+  "thresholds_total": {
+    "short": 5384,
+    "medium": 12168,
+    "long": 15152
+  },
+  "by_category_total_based": {
+    "short": 198
+  },
+  "actual_output_stats": {
+    "min": 0.0,
+    "max": 0.0,
+    "mean": 0.0,
+    "std": 0.0,
+    "p50": 0.0,
+    "p90": 0.0,
+    "p99": 0.0
+  },
+  "actual_total_stats": {
+    "min": 84.0,
+    "max": 2811.0,
+    "mean": 258.5,
+    "std": 214.44077494636124,
+    "p50": 223.0,
+    "p90": 380.50000000000006,
+    "p99": 804.1200000000001
   }
 }

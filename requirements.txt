@@ -3,7 +3,7 @@
 # Core ML/DL frameworks
 # vLLM 0.9.0 requires PyTorch 2.4+ and transformers 4.45.x
 vllm==0.9.0
-torch>=2.4.0,<2.6.0
+torch==2.7.0
 transformers==4.51.1
 
 # Dataset handling

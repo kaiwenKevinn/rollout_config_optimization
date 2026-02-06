@@ -1,0 +1,10 @@
+hetero_env
+node_modules/
+dist/
+build/
+*.log
+.DS_Store
+*.tmp
+.env
+*.db
+datasets

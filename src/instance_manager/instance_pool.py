@@ -186,7 +186,8 @@ class InstancePool:
                 max_model_len=self.config.model_config.get("max_model_len", 8192),
                 dtype=self.config.model_config.get("dtype", "auto"),
                 trust_remote_code=self.config.model_config.get("trust_remote_code", True),
-                gpu_memory_utilization=self.config.model_config.get("gpu_memory_utilization", 0.90)
+                gpu_memory_utilization=self.config.model_config.get("gpu_memory_utilization", 0.90),
+                log_dir=self.config.server_config.get("log_dir", None)
             )
             
             # Allocate GPUs

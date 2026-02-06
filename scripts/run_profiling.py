@@ -29,7 +29,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 def setup_hf_environment():
     """Setup HuggingFace environment and login."""
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
-    
+    hf_token = os.environ.get("HF_TOKEN", "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")
+
     # Only login if token is available and valid
     if hf_token:
         try:
@@ -42,7 +43,10 @@ def setup_hf_environment():
 
 
 # Import project modules after setting up path
-from src.profiler.dataset_loader import GPQADatasetLoader, GPQAQuestion
+from src.profiler.dataset_loader import (
+    BaseDatasetLoader, GPQADatasetLoader, AIME25DatasetLoader, 
+    create_dataset_loader, load_dataset_by_type
+)
 from src.profiler.sequence_profiler import SequenceProfiler, SequenceInfo
 from src.instance_manager.vllm_instance import (
     VLLMInstance, InstanceConfig, GenerationParams, GenerationResult
@@ -80,24 +84,22 @@ def run_profiling(config: dict, output_dir: str):
     
     # Load dataset
     logger.info("=" * 60)
-    logger.info("Loading GPQA-Diamond dataset...")
-    logger.info("=" * 60)
-    
     dataset_config = config.get("dataset", {})
-    loader = GPQADatasetLoader(
-        dataset_name=dataset_config.get("name", "Idavidrein/gpqa"),
-        subset=dataset_config.get("subset", "gpqa_diamond"),
-        split=dataset_config.get("split", "train"),
-        cache_dir=dataset_config.get("cache_dir", "./cache/datasets"),
-        max_samples=dataset_config.get("max_samples"),
-        prompt_style=dataset_config.get("prompt_style", "detailed")
-    )
+    dataset_type = dataset_config.get("type", "gpqa")
+    
+    if dataset_type.lower() == "gpqa":
+        logger.info("Loading GPQA-Diamond dataset...")
+        loader = load_dataset_by_type(config)
+    elif dataset_type.lower() == "aime25":
+        logger.info("Loading AIME 25 dataset...")
+        loader = load_dataset_by_type(config)
+    else:
+        raise ValueError(f"Unsupported dataset type: {dataset_type}")
+    
+    logger.info("=" * 60)
     
     questions = loader.load()
     stats = loader.get_statistics()
-    
-    logger.info(f"Loaded {len(questions)} questions")
-    logger.info(f"Subjects: {len(stats.subjects)}")
     logger.info(f"Avg question length: {stats.avg_question_length:.1f} chars")
     
     # Profile sequences (estimation only)
@@ -146,7 +148,8 @@ async def run_profiling_with_inference(
     tp_degree: int = 4,
     gpu_ids: Optional[List[int]] = None,
     max_concurrent: int = 8,
-    save_intermediate: bool = True
+    save_intermediate: bool = True,
+    request_timeout: int = 600
 ):
     """
     Run profiling with actual model inference to get real output token counts.
@@ -176,24 +179,22 @@ async def run_profiling_with_inference(
     
     # ========== Phase 1: Load dataset and estimate input tokens ==========
     logger.info("=" * 60)
-    logger.info("Phase 1: Loading GPQA-Diamond dataset...")
-    logger.info("=" * 60)
-    
     dataset_config = config.get("dataset", {})
-    loader = GPQADatasetLoader(
-        dataset_name=dataset_config.get("name", "Idavidrein/gpqa"),
-        subset=dataset_config.get("subset", "gpqa_diamond"),
-        split=dataset_config.get("split", "train"),
-        cache_dir=dataset_config.get("cache_dir", "./cache/datasets"),
-        max_samples=dataset_config.get("max_samples"),
-        prompt_style=dataset_config.get("prompt_style", "detailed")
-    )
+    dataset_type = dataset_config.get("type", "gpqa")
+    
+    if dataset_type.lower() == "gpqa":
+        logger.info("Phase 1: Loading GPQA-Diamond dataset...")
+        loader = load_dataset_by_type(config)
+    elif dataset_type.lower() == "aime25":
+        logger.info("Phase 1: Loading AIME 25 dataset...")
+        loader = load_dataset_by_type(config)
+    else:
+        raise ValueError(f"Unsupported dataset type: {dataset_type}")
+    
+    logger.info("=" * 60)
     
     questions = loader.load()
     stats = loader.get_statistics()
-    
-    logger.info(f"Loaded {len(questions)} questions")
-    logger.info(f"Subjects: {len(stats.subjects)}")
     
     # ========== Phase 2: Profile input tokens ==========
     logger.info("\n" + "=" * 60)
@@ -256,7 +257,8 @@ async def run_profiling_with_inference(
         max_model_len=model_config.get("max_model_len", 8192),
         dtype=model_config.get("dtype", "auto"),
         trust_remote_code=model_config.get("trust_remote_code", True),
-        gpu_memory_utilization=model_config.get("gpu_memory_utilization", 0.90)
+        gpu_memory_utilization=model_config.get("gpu_memory_utilization", 0.90),
+        log_dir=output_dir  # Save vLLM logs to output directory
     )
     
     # Log the configuration for debugging
@@ -300,6 +302,7 @@ async def run_profiling_with_inference(
             sequences=sequences,
             gen_params=gen_params,
             max_concurrent=max_concurrent,
+            request_timeout=request_timeout,
             logger=logger
         )
         
@@ -380,6 +383,7 @@ async def _run_inference_batch(
     sequences: List[SequenceInfo],
     gen_params: GenerationParams,
     max_concurrent: int,
+    request_timeout: int,
     logger: logging.Logger
 ) -> List[GenerationResult]:
     """
@@ -400,12 +404,48 @@ async def _run_inference_batch(
     
     async def process_sequence(idx: int, seq: SequenceInfo):
         async with semaphore:
-            result = await instance.generate(
-                prompt=seq.prompt,
-                params=gen_params,
-                request_id=seq.question_id
-            )
-            results[idx] = result
+            logger.info(f"Processing sequence {idx+1}/{len(sequences)}: {seq.question_id}")
+            start_time = time.time()
+            try:
+                result = await asyncio.wait_for(
+                    instance.generate(
+                        prompt=seq.prompt,
+                        params=gen_params,
+                        request_id=seq.question_id
+                    ),
+                    timeout=request_timeout
+                )
+                elapsed = time.time() - start_time
+                logger.info(f"Sequence {idx+1} completed in {elapsed:.1f}s with {result.output_tokens} output tokens")
+                results[idx] = result
+            except asyncio.TimeoutError:
+                elapsed = time.time() - start_time
+                logger.error(f"Sequence {idx+1} timed out after {elapsed:.1f}s")
+                results[idx] = GenerationResult(
+                    request_id=seq.question_id,
+                    prompt=seq.prompt,
+                    generated_text="",
+                    input_tokens=0,
+                    output_tokens=0,
+                    finish_reason="timeout",
+                    total_time=elapsed,
+                    success=False,
+                    error_message=f"Request timeout after {request_timeout}s"
+                )
+            except Exception as e:
+                elapsed = time.time() - start_time
+                logger.error(f"Sequence {idx+1} failed after {elapsed:.1f}s: {e}")
+                results[idx] = GenerationResult(
+                    request_id=seq.question_id,
+                    prompt=seq.prompt,
+                    generated_text="",
+                    input_tokens=0,
+                    output_tokens=0,
+                    finish_reason="error",
+                    total_time=elapsed,
+                    success=False,
+                    error_message=str(e)
+                )
     
     # Create tasks
     tasks = [
@@ -476,14 +516,31 @@ def _save_profiling_results(
     # Save dataset stats
     stats = loader.get_statistics()
     stats_file = output_path / "dataset_stats.json"
-    stats_data = {
-        "total_questions": stats.total_questions,
-        "subjects": stats.subjects,
-        "avg_question_length": stats.avg_question_length,
-        "min_question_length": stats.min_question_length,
-        "max_question_length": stats.max_question_length,
-        "avg_choices_per_question": stats.avg_choices_per_question
-    }
+    
+    # Handle different stats types
+    if hasattr(stats, 'avg_choices_per_question'):
+        # GPQA stats
+        stats_data = {
+            "total_questions": stats.total_questions,
+            "subjects": stats.subjects,
+            "avg_question_length": stats.avg_question_length,
+            "min_question_length": stats.min_question_length,
+            "max_question_length": stats.max_question_length,
+            "avg_choices_per_question": stats.avg_choices_per_question
+        }
+    else:
+        # AIME25 stats
+        stats_data = {
+            "total_questions": stats.total_questions,
+            "subjects": stats.subjects,
+            "avg_question_length": stats.avg_question_length,
+            "min_question_length": stats.min_question_length,
+            "max_question_length": stats.max_question_length,
+            "problem_types": getattr(stats, 'problem_types', {}),
+            "difficulty_distribution": getattr(stats, 'difficulty_distribution', {}),
+            "avg_answer_length": getattr(stats, 'avg_answer_length', 0)
+        }
+    
     with open(stats_file, 'w', encoding='utf-8') as f:
         json.dump(stats_data, f, indent=2, ensure_ascii=False)
     logger.info(f"Saved dataset stats to: {stats_file}")
@@ -534,7 +591,7 @@ def _get_recommended_tp(category: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Profile GPQA-Diamond dataset for heterogeneous TP benchmarking"
+        description="Profile datasets for heterogeneous TP benchmarking"
     )
     parser.add_argument(
         "--config", "-c",
@@ -547,6 +604,13 @@ def main():
         type=str,
         default="results/profiling",
         help="Output directory for profiling results"
+    )
+    parser.add_argument(
+        "--dataset-type",
+        type=str,
+        default=None,
+        choices=["gpqa", "aime25"],
+        help="Dataset type to use (overrides config file)"
     )
     parser.add_argument(
         "--log-level",
@@ -573,6 +637,18 @@ def main():
         help="Tensor parallelism degree for inference (default: 4)"
     )
     parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=1000,
+        help="Maximum tokens to generate per request (default: 1000)"
+    )
+    parser.add_argument(
+        "--request-timeout",
+        type=int,
+        default=600,
+        help="Individual request timeout in seconds (default: 600)"
+    )
+    parser.add_argument(
         "--gpus",
         type=str,
         default=None,
@@ -581,8 +657,8 @@ def main():
     parser.add_argument(
         "--max-concurrent",
         type=int,
-        default=8,
-        help="Maximum concurrent requests during inference (default: 8)"
+        default=4,
+        help="Maximum concurrent requests during inference (default: 4)"
     )
     
     args = parser.parse_args()
@@ -603,6 +679,16 @@ def main():
     
     config = load_config(str(config_path))
     print("Configuration loaded successfully")
+    # Override dataset type from command line if specified
+    if args.dataset_type:
+        config.setdefault('dataset', {})['type'] = args.dataset_type
+        print(f"Using dataset type from command line: {args.dataset_type}")
+    
+    # Determine dataset type for logging
+    dataset_config = config.get('dataset', {})
+    dataset_type = dataset_config.get('type', 'gpqa')
+    print(f"Dataset type: {dataset_type}")
+    
     # Parse GPU IDs
     gpu_ids = None
     if args.gpus:
@@ -612,21 +698,36 @@ def main():
     output_dir = PROJECT_ROOT / args.output
     
     if args.with_inference:
+        # Determine max_concurrent: command line > config file > default
+        benchmark_config = config.get('benchmark', {})
+        max_concurrent = args.max_concurrent
+        if max_concurrent == 4:  # default value, check config file
+            max_concurrent = benchmark_config.get('max_concurrent_requests', 4)
+        print(f"Using max_concurrent: {max_concurrent}")
+        
+        # Determine request_timeout: command line > config file > default
+        scheduling_config = config.get('scheduling', {})
+        request_timeout = args.request_timeout
+        if request_timeout == 600:  # default value, check config file
+            request_timeout = scheduling_config.get('request_timeout', 600)
+        print(f"Using request_timeout: {request_timeout}s")
+        
         # Run with actual inference
         result = asyncio.run(run_profiling_with_inference(
             config=config,
             output_dir=str(output_dir),
             tp_degree=args.tp,
             gpu_ids=gpu_ids,
-            max_concurrent=args.max_concurrent
+            max_concurrent=max_concurrent,
+            request_timeout=request_timeout
         ))
         print(f"\nProfiling with inference complete!")
-        print(f"Analyzed {result['total_questions']} questions")
+        print(f"Analyzed {result['total_questions']} {dataset_type} questions")
         print(f"Completed inference for {result['completed_sequences']} sequences")
     else:
         # Run estimation only
         result = run_profiling(config, str(output_dir))
-        print(f"\nProfiling complete! Analyzed {result['total_questions']} questions.")
+        print(f"\nProfiling complete! Analyzed {result['total_questions']} {dataset_type} questions.")
     
     print(f"Results saved to: {result['output_dir']}")
 
