@@ -1,0 +1,2 @@
+scenario,type,num_runs,total_requests,success_rate,throughput_mean,throughput_std,latency_mean,latency_p50,latency_p90,latency_p99,ttft_mean,ttft_p99,tpot_mean,tpot_p99,gpu_memory_peak_gb
+config_based_heterogeneous,heterogeneous,2,30,1.0,263.25518398025486,11.737917802633802,470286.31680806476,694917.3151254654,746338.4490728378,746366.9406104088,225.50408045450845,313.1166410446167,36.415626637568394,38.30273442468457,76.6759033203125

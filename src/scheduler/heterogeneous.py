@@ -104,6 +104,7 @@ class HeterogeneousScheduler(BaseScheduler):
         self,
         routing_rules: Optional[Dict[str, List[int]]] = None,
         length_thresholds: Optional[Dict[str, int]] = None,
+        total_length_thresholds: Optional[Dict[str, int]] = None,
         load_balance_strategy: SchedulingStrategy = SchedulingStrategy.LEAST_CONNECTIONS,
         max_queue_length: int = 100,
         enable_fallback: bool = True,
@@ -114,7 +115,8 @@ class HeterogeneousScheduler(BaseScheduler):
         
         Args:
             routing_rules: Custom routing rules {category: [tp_degrees]}
-            length_thresholds: Custom length thresholds
+            length_thresholds: Input token length thresholds (pre-inference)
+            total_length_thresholds: Total token length thresholds (post-inference, including output)
             load_balance_strategy: Strategy for balancing within TP groups
             max_queue_length: Maximum queue length before using fallback
             enable_fallback: Whether to use fallback routing
@@ -126,10 +128,18 @@ class HeterogeneousScheduler(BaseScheduler):
         self._routing_rules = self._build_routing_rules(routing_rules)
         
         # Length thresholds
-        self._thresholds = length_thresholds or {
+        self._input_thresholds = length_thresholds or {
             "short": 256,
             "medium": 512,
             "long": 1024
+        }
+        
+        # Total length thresholds (for actual token-based classification)
+        self._total_thresholds = total_length_thresholds or {
+            "short": 6000,
+            "medium": 12000,
+            "long": 18000,
+            "extra_long": float('inf')
         }
         
         # Load balancing
@@ -144,7 +154,8 @@ class HeterogeneousScheduler(BaseScheduler):
         # Performance tracking for adaptive routing
         self._performance_history: Dict[Tuple[str, int], List[float]] = defaultdict(list)
         
-        logger.info(f"Initialized HeterogeneousScheduler with thresholds: {self._thresholds}")
+        logger.info(f"Initialized HeterogeneousScheduler with input thresholds: {self._input_thresholds}")
+        logger.info(f"Total token thresholds: {self._total_thresholds}")
     
     def _build_routing_rules(
         self,
@@ -218,6 +229,16 @@ class HeterogeneousScheduler(BaseScheduler):
                 reason="No available instances for routing"
             )
             self._hetero_stats.failed_schedules += 1
+            
+            # 记录调度失败信息
+            failure_info = {
+                "request_id": request.request_id,
+                "question_id": request.question_id,
+                "sequence_category": request.sequence_category,
+                "reason": "No available instances for routing",
+                "available_instances_count": len(available_instances)
+            }
+            logger.warning(f"Heterogeneous Routing Failed: {failure_info}")
         else:
             # Update request metadata
             request.scheduled_at = time.time()
@@ -247,10 +268,19 @@ class HeterogeneousScheduler(BaseScheduler):
             self._hetero_stats.category_to_tp[cat][tp] = \
                 self._hetero_stats.category_to_tp[cat].get(tp, 0) + 1
             
-            logger.debug(
-                f"Scheduled {request.request_id} ({cat}, {request.input_tokens} tokens) "
-                f"-> {selected.instance_id} (TP={tp})"
-            )
+            # 记录详细的调度结果到日志
+            routing_info = {
+                "request_id": request.request_id,
+                "question_id": request.question_id,
+                "sequence_category": cat,
+                "input_tokens": request.input_tokens,
+                "actual_total_tokens": request.actual_total_tokens,
+                "target_instance_id": selected.instance_id,
+                "target_tp_degree": tp,
+                "routing_type": "fallback" if is_fallback else "preferred",
+                "queue_time_ms": round(request.get_queue_time() * 1000, 2)
+            }
+            logger.info(f"Heterogeneous Routing Result: {routing_info}")
         
         self.record_result(result)
         return result
@@ -363,8 +393,8 @@ class HeterogeneousScheduler(BaseScheduler):
         Args:
             thresholds: New thresholds
         """
-        self._thresholds.update(thresholds)
-        logger.info(f"Updated thresholds: {self._thresholds}")
+        self._input_thresholds.update(thresholds)
+        logger.info(f"Updated input thresholds: {self._input_thresholds}")
     
     def record_performance(
         self,
@@ -528,11 +558,19 @@ def create_heterogeneous_scheduler(
     # Build routing rules from config
     routing_rules = scheduling_config.get("routing_rules", {})
     
-    # Get thresholds
-    thresholds = scheduling_config.get("length_thresholds", {
+    # Get input token thresholds (pre-inference)
+    input_thresholds = scheduling_config.get("length_thresholds", {
         "short": 256,
         "medium": 512,
         "long": 1024
+    })
+    
+    # Get total token thresholds (post-inference, including output)
+    total_thresholds = scheduling_config.get("total_length_thresholds", {
+        "short": 6000,
+        "medium": 12000,
+        "long": 18000,
+        "extra_long": float('inf')
     })
     
     # Get load balance strategy
@@ -546,7 +584,8 @@ def create_heterogeneous_scheduler(
     
     return HeterogeneousScheduler(
         routing_rules=routing_rules,
-        length_thresholds=thresholds,
+        length_thresholds=input_thresholds,
+        total_length_thresholds=total_thresholds,
         load_balance_strategy=strategy,
         max_queue_length=scheduling_config.get("max_queue_length", 100),
         enable_fallback=True,

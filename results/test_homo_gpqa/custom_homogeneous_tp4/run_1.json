@@ -1,0 +1,81 @@
+{
+  "run_id": 1,
+  "scenario_name": "custom_homogeneous_tp4",
+  "success": true,
+  "duration": 6967.21330332756,
+  "error_message": "",
+  "metrics": {
+    "scenario_name": "custom_homogeneous_tp4",
+    "run_id": 1,
+    "start_time": "2026-02-07T17:34:08.618145",
+    "end_time": "2026-02-07T19:26:34.268105",
+    "duration_seconds": 6745.649960756302,
+    "total_requests": 198,
+    "successful_requests": 198,
+    "failed_requests": 0,
+    "total_input_tokens": 51183,
+    "total_output_tokens": 6540412,
+    "throughput_tokens_per_second": 969.5747686360395,
+    "requests_per_second": 0.02935224939804034,
+    "ttft_mean": 2254.6373232446535,
+    "ttft_std": 333.3577580728268,
+    "ttft_p50": 2309.4170093536377,
+    "ttft_p90": 2598.918867111206,
+    "ttft_p99": 2779.7561073303223,
+    "tpot_mean": 96.69930134185824,
+    "tpot_std": 63.47631144448746,
+    "tpot_p50": 81.3417718663109,
+    "tpot_p90": 151.2297869449908,
+    "tpot_p99": 374.5536939885465,
+    "latency_mean": 3315158.5438251495,
+    "latency_std": 1995514.2074304188,
+    "latency_p50": 3217010.4113817215,
+    "latency_p90": 6004627.777767181,
+    "latency_p99": 6415844.213750362,
+    "gpu_memory_peak_gb": 76.58416748046875,
+    "gpu_utilization_mean": 87.93990654205606,
+    "per_instance_metrics": {
+      "custom_homo_tp4_0": {
+        "request_count": 99,
+        "tp_degree": 4,
+        "total_tokens": 3174208,
+        "latency_mean": 3140076.872849705,
+        "latency_p50": 3119561.791419983,
+        "latency_p99": 6053682.3292303085,
+        "throughput_mean": 13.319153119935475
+      },
+      "custom_homo_tp4_1": {
+        "request_count": 99,
+        "tp_degree": 4,
+        "total_tokens": 3366204,
+        "latency_mean": 3490240.214800594,
+        "latency_p50": 3306028.2645225525,
+        "latency_p99": 6605747.386784553,
+        "throughput_mean": 12.840716019003874
+      }
+    },
+    "scheduling_success_rate": 1.0,
+    "avg_queue_time": 0.002247569536921954
+  },
+  "scheduler_stats": {
+    "total_requests": 203,
+    "successful_schedules": 203,
+    "failed_schedules": 0,
+    "success_rate": 1.0,
+    "avg_queue_time": 0.002200476641725437,
+    "max_queue_time": 0.22538161277770996,
+    "by_category": {
+      "extra_long": 167,
+      "short": 28,
+      "medium": 8
+    },
+    "by_tp_degree": {
+      "4": 203
+    },
+    "by_instance": {
+      "custom_homo_tp4_0": 104,
+      "custom_homo_tp4_1": 99
+    }
+  },
+  "request_count": 198
+}

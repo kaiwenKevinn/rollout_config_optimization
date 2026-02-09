@@ -1,0 +1,615 @@
+nohup: ignoring input
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+2026-02-06 20:40:15,544 - __main__ - INFO - Found 3 heterogeneous instance configurations in config
+2026-02-06 20:40:15,544 - __main__ - INFO -   Instance 0: TP=2, GPUs=[0, 1]
+2026-02-06 20:40:15,544 - __main__ - INFO -     Description: TP=1 instance for medium sequences
+2026-02-06 20:40:15,544 - __main__ - INFO -   Instance 1: TP=2, GPUs=[2, 3]
+2026-02-06 20:40:15,545 - __main__ - INFO -     Description: TP=2 instance for short sequences
+2026-02-06 20:40:15,545 - __main__ - INFO -   Instance 2: TP=4, GPUs=[4, 5, 6, 7]
+2026-02-06 20:40:15,545 - __main__ - INFO -     Description: TP=4  instance for long sequences
+2026-02-06 20:40:15,546 - __main__ - INFO - ============================================================
+2026-02-06 20:40:15,547 - __main__ - INFO - Heterogeneous TP Benchmark Configuration
+2026-02-06 20:40:15,548 - __main__ - INFO - ============================================================
+2026-02-06 20:40:15,548 - __main__ - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137
+2026-02-06 20:40:15,548 - __main__ - INFO - Total GPUs: 8
+2026-02-06 20:40:15,549 - __main__ - INFO - Scenarios to run: ['config_based_heterogeneous']
+2026-02-06 20:40:15,549 - __main__ - INFO - Runs per scenario: 2
+2026-02-06 20:40:15,550 - __main__ - INFO - Output directory: results/test_hetero
+2026-02-06 20:40:15,550 - __main__ - INFO - Profiling directory: ./results/aime25_test
+2026-02-06 20:40:15,551 - __main__ - INFO - 
+Config-based Heterogeneous Instances:
+2026-02-06 20:40:15,551 - __main__ - INFO -   Instance 0: TP=2, GPUs=[0, 1]
+2026-02-06 20:40:15,551 - __main__ - INFO -     Description: TP=1 instance for medium sequences
+2026-02-06 20:40:15,552 - __main__ - INFO -   Instance 1: TP=2, GPUs=[2, 3]
+2026-02-06 20:40:15,552 - __main__ - INFO -     Description: TP=2 instance for short sequences
+2026-02-06 20:40:15,554 - __main__ - INFO -   Instance 2: TP=4, GPUs=[4, 5, 6, 7]
+2026-02-06 20:40:15,554 - __main__ - INFO -     Description: TP=4  instance for long sequences
+2026-02-06 20:40:15,555 - __main__ - INFO - Length thresholds: {'short': 5000, 'medium': 10000, 'long': 15000}
+2026-02-06 20:40:15,555 - __main__ - INFO - Routing rules: {'short': [1, 2], 'medium': [2, 4], 'long': [4], 'extra_long': [4]}
+2026-02-06 20:40:15,556 - __main__ - INFO - ============================================================
+2026-02-06 20:40:15,557 - __main__ - INFO - Loading dataset...
+2026-02-06 20:40:15,557 - __main__ - INFO - ============================================================
+2026-02-06 20:40:15,558 - src.profiler.dataset_loader - INFO - Loading AIME 25 dataset: opencompass/AIME2025
+2026-02-06 20:40:15,559 - src.profiler.dataset_loader - INFO - Loading from cache: datasets/aime25_AIME2025-I_test_processed.json
+2026-02-06 20:40:15,561 - __main__ - INFO - 
+============================================================
+2026-02-06 20:40:15,562 - __main__ - INFO - Profiling sequences...
+2026-02-06 20:40:15,562 - __main__ - INFO - ============================================================
+2026-02-06 20:40:15,563 - src.profiler.sequence_profiler - INFO - Profiling 15 questions
+Profiling sequences:   0%|          | 0/15 [00:00<?, ?it/s]2026-02-06 20:40:15,566 - src.profiler.sequence_profiler - INFO - Loading tokenizer: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137
+Profiling sequences:   7%|▋         | 1/15 [00:00<00:06,  2.06it/s]Profiling sequences: 100%|██████████| 15/15 [00:00<00:00, 30.36it/s]
+2026-02-06 20:40:16,062 - src.profiler.sequence_profiler - INFO - Profiled 15 sequences
+2026-02-06 20:40:16,062 - __main__ - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/vllm_logs
+2026-02-06 20:40:16,064 - src.benchmark.runner - INFO - Loading actual total tokens from profiling directory: ./results/aime25_test
+2026-02-06 20:40:16,069 - src.profiler.sequence_profiler - INFO - Loaded actual tokens from profiling for 15 sequences
+2026-02-06 20:40:16,069 - src.benchmark.runner - INFO - Successfully loaded actual tokens for 15 sequences
+2026-02-06 20:40:16,071 - src.benchmark.runner - INFO - BenchmarkRunner initialized with 15 sequences
+2026-02-06 20:40:16,071 - __main__ - INFO - 
+============================================================
+2026-02-06 20:40:16,072 - __main__ - INFO - Using Predefined Scenarios
+2026-02-06 20:40:16,073 - __main__ - INFO - ============================================================
+2026-02-06 20:40:16,074 - __main__ - INFO - 
+============================================================
+2026-02-06 20:40:16,075 - __main__ - INFO - Running Heterogeneous Scenario: config_based_heterogeneous
+2026-02-06 20:40:16,076 - __main__ - INFO - ============================================================
+2026-02-06 20:40:16,077 - src.benchmark.runner - INFO - Starting scenario: config_based_heterogeneous
+2026-02-06 20:40:16,079 - src.benchmark.runner - INFO -   Type: heterogeneous
+2026-02-06 20:40:16,079 - src.benchmark.runner - INFO -   Instances: 3
+2026-02-06 20:40:16,080 - src.benchmark.runner - INFO -   Runs: 2
+2026-02-06 20:40:16,085 - src.benchmark.runner - INFO - 
+==================================================
+2026-02-06 20:40:16,086 - src.benchmark.runner - INFO - Starting run 1/2
+2026-02-06 20:40:16,086 - src.benchmark.runner - INFO - ==================================================
+2026-02-06 20:40:16,087 - src.instance_manager.gpu_allocator - INFO - GPU Allocator initialized: 8 GPUs, 8 available
+2026-02-06 20:40:16,088 - src.scheduler.heterogeneous - INFO - Initialized HeterogeneousScheduler with input thresholds: {'short': 5000, 'medium': 10000, 'long': 15000}
+2026-02-06 20:40:16,089 - src.scheduler.heterogeneous - INFO - Total token thresholds: {'short': 6000, 'medium': 12000, 'long': 18000}
+2026-02-06 20:40:16,090 - src.scheduler.heterogeneous - INFO - Updated input thresholds: {'short': 5000, 'medium': 10000, 'long': 15000}
+2026-02-06 20:40:16,091 - src.scheduler.heterogeneous - INFO - Updated routing rule for short: preferred=[1, 2]
+2026-02-06 20:40:16,092 - src.scheduler.heterogeneous - INFO - Updated routing rule for medium: preferred=[2, 4]
+2026-02-06 20:40:16,093 - src.scheduler.heterogeneous - INFO - Updated routing rule for long: preferred=[4]
+2026-02-06 20:40:16,094 - src.scheduler.heterogeneous - INFO - Updated routing rule for extra_long: preferred=[4]
+2026-02-06 20:40:16,120 - src.benchmark.runner - INFO - Starting instance pool...
+2026-02-06 20:40:16,120 - src.instance_manager.instance_pool - INFO - Starting instance pool
+2026-02-06 20:40:16,122 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [0, 1] to instance hetero_tp2_0
+2026-02-06 20:40:16,123 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [2, 3] to instance hetero_tp2_1
+2026-02-06 20:40:16,124 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [4, 5, 6, 7] to instance hetero_tp4_0
+2026-02-06 20:40:16,125 - src.instance_manager.instance_pool - INFO - Starting instance hetero_tp2_0
+2026-02-06 20:40:16,126 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance hetero_tp2_0 on port 8000
+2026-02-06 20:40:16,127 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 21000
+2026-02-06 20:40:16,128 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8000 --host 127.0.0.1 --max-model-len 21000 --dtype auto --gpu-memory-utilization 0.95 --trust-remote-code --enforce-eager
+2026-02-06 20:40:16,129 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 0,1
+2026-02-06 20:40:16,131 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/vllm_logs/vllm_hetero_tp2_0.log
+2026-02-06 20:40:44,266 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 20:41:14,395 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 20:41:24,424 - src.instance_manager.vllm_instance - INFO - Health check passed after 35 attempts
+2026-02-06 20:41:24,698 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 is ready
+2026-02-06 20:41:24,699 - src.instance_manager.instance_pool - INFO - Starting instance hetero_tp2_1
+2026-02-06 20:41:24,699 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance hetero_tp2_1 on port 8001
+2026-02-06 20:41:24,699 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 21000
+2026-02-06 20:41:24,700 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8001 --host 127.0.0.1 --max-model-len 21000 --dtype auto --gpu-memory-utilization 0.95 --trust-remote-code --enforce-eager
+2026-02-06 20:41:24,701 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 2,3
+2026-02-06 20:41:24,702 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/vllm_logs/vllm_hetero_tp2_1.log
+2026-02-06 20:41:24,710 - src.instance_manager.vllm_instance - INFO - Health check passed after 1 attempts
+2026-02-06 20:41:24,811 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 is ready
+2026-02-06 20:41:24,811 - src.instance_manager.instance_pool - INFO - Starting instance hetero_tp4_0
+2026-02-06 20:41:24,811 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance hetero_tp4_0 on port 8002
+2026-02-06 20:41:24,811 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 21000
+2026-02-06 20:41:24,812 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 4 --port 8002 --host 127.0.0.1 --max-model-len 21000 --dtype auto --gpu-memory-utilization 0.95 --trust-remote-code --enforce-eager
+2026-02-06 20:41:24,813 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 4,5,6,7
+2026-02-06 20:41:24,814 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/vllm_logs/vllm_hetero_tp4_0.log
+2026-02-06 20:41:52,931 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 20:42:23,079 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 20:42:27,103 - src.instance_manager.vllm_instance - INFO - Health check passed after 32 attempts
+2026-02-06 20:42:27,244 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 is ready
+2026-02-06 20:42:27,245 - src.instance_manager.instance_pool - INFO - Instance pool started with 3 ready instances
+2026-02-06 20:42:27,246 - src.benchmark.runner - INFO - Running warmup (0 requests)...
+2026-02-06 20:42:27,247 - src.benchmark.runner - INFO - Warmup completed
+2026-02-06 20:42:27,248 - src.benchmark.runner - INFO - Running benchmark (15 requests)...
+
+============================================================
+Sequence Profiling Summary
+============================================================
+
+Total Sequences: 15
+Completed Sequences: 0
+
+Input Thresholds: short<=5000, medium<=10000, long<=15000
+Total Thresholds: short<=1000, medium<=3000, long<=8000
+
+Distribution by Category (Input-based):
+  short       :   15 (100.0%)
+
+Input Token Statistics:
+  Min:  53
+  Max:  263
+  Mean: 130.8
+  Std:  52.1
+  P50:  123
+  P90:  198
+  P99:  257
+
+Distribution by Subject:
+  Other                         :   15 (100.0%)
+============================================================
+
+============================================================
+Scenario: config_based_heterogeneous
+============================================================
+Type: heterogeneous
+Description: Heterogeneous configuration loaded from config file
+
+Instances (3):
+  - hetero_tp2_0: TP=2, GPUs=[0, 1]
+    TP=2 on GPUs [0, 1]
+  - hetero_tp2_1: TP=2, GPUs=[2, 3]
+    TP=2 on GPUs [2, 3]
+  - hetero_tp4_0: TP=4, GPUs=[4, 5, 6, 7]
+    TP=4 on GPUs [4, 5, 6, 7]
+
+Total GPUs: 8
+TP Distribution: {2: 2, 4: 1}
+
+Benchmark Settings:
+  Runs: 2
+  Warmup Requests: 0
+  Max Concurrent: 15
+
+Length-based Routing: Enabled
+  Thresholds: {'short': 5000, 'medium': 10000, 'long': 15000}
+  Rules: {'short': [1, 2], 'medium': [2, 4], 'long': [4], 'extra_long': [4]}
+============================================================
+
+============================================================
+Instance Pool Status
+============================================================
+State: running
+Total Instances: 3
+Ready: 3, Busy: 0, Error: 0
+Total Requests: 0, Failed: 0
+
+By TP Degree:
+  TP=2: 2/2 ready, 0 requests
+  TP=4: 1/1 ready, 0 requests
+
+Instance Details:
+  VLLMInstance(id=hetero_tp2_0, tp=2, gpus=[0, 1], state=ready)
+  VLLMInstance(id=hetero_tp2_1, tp=2, gpus=[2, 3], state=ready)
+  VLLMInstance(id=hetero_tp4_0, tp=4, gpus=[4, 5, 6, 7], state=ready)
+============================================================
+Benchmark progress:   0%|          | 0/15 [00:00<?, ?it/s]2026-02-06 20:42:27,261 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_2_aime25_14', 'question_id': 'aime25_14', 'input_tokens': 91, 'actual_total_tokens': 13985, 'sequence_category': 'long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,261 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_2_aime25_14', 'question_id': 'aime25_14', 'sequence_category': 'long', 'input_tokens': 91, 'actual_total_tokens': 13985, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.19}
+2026-02-06 20:42:27,262 - src.benchmark.runner - INFO - Executing request bench_2_aime25_14 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,262 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_2_aime25_14, prompt_len=283
+2026-02-06 20:42:27,265 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_5_aime25_5', 'question_id': 'aime25_5', 'input_tokens': 106, 'actual_total_tokens': 20106, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,266 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_5_aime25_5', 'question_id': 'aime25_5', 'sequence_category': 'extra_long', 'input_tokens': 106, 'actual_total_tokens': 20106, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.23}
+2026-02-06 20:42:27,266 - src.benchmark.runner - INFO - Executing request bench_5_aime25_5 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,267 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_5_aime25_5, prompt_len=343
+2026-02-06 20:42:27,268 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_7_aime25_8', 'question_id': 'aime25_8', 'input_tokens': 123, 'actual_total_tokens': 9595, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,269 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_7_aime25_8', 'question_id': 'aime25_8', 'sequence_category': 'medium', 'input_tokens': 123, 'actual_total_tokens': 9595, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.31}
+2026-02-06 20:42:27,270 - src.benchmark.runner - INFO - Executing request bench_7_aime25_8 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:42:27,270 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_7_aime25_8, prompt_len=423
+2026-02-06 20:42:27,273 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_10_aime25_6', 'question_id': 'aime25_6', 'input_tokens': 142, 'actual_total_tokens': 20142, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,273 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_10_aime25_6', 'question_id': 'aime25_6', 'sequence_category': 'extra_long', 'input_tokens': 142, 'actual_total_tokens': 20142, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.13}
+2026-02-06 20:42:27,274 - src.benchmark.runner - INFO - Executing request bench_10_aime25_6 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,275 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_10_aime25_6, prompt_len=546
+2026-02-06 20:42:27,278 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_4_aime25_12', 'question_id': 'aime25_12', 'input_tokens': 99, 'actual_total_tokens': 20099, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,278 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_4_aime25_12', 'question_id': 'aime25_12', 'sequence_category': 'extra_long', 'input_tokens': 99, 'actual_total_tokens': 20099, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.27}
+2026-02-06 20:42:27,279 - src.benchmark.runner - INFO - Executing request bench_4_aime25_12 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,280 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_4_aime25_12, prompt_len=479
+2026-02-06 20:42:27,282 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_0_aime25_0', 'question_id': 'aime25_0', 'input_tokens': 53, 'actual_total_tokens': 20053, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,282 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_0_aime25_0', 'question_id': 'aime25_0', 'sequence_category': 'extra_long', 'input_tokens': 53, 'actual_total_tokens': 20053, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.2}
+2026-02-06 20:42:27,283 - src.benchmark.runner - INFO - Executing request bench_0_aime25_0 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,284 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_0_aime25_0, prompt_len=175
+2026-02-06 20:42:27,287 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_3_aime25_4', 'question_id': 'aime25_4', 'input_tokens': 95, 'actual_total_tokens': 9683, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,287 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_3_aime25_4', 'question_id': 'aime25_4', 'sequence_category': 'medium', 'input_tokens': 95, 'actual_total_tokens': 9683, 'target_instance_id': 'hetero_tp2_1', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.1}
+2026-02-06 20:42:27,288 - src.benchmark.runner - INFO - Executing request bench_3_aime25_4 on instance hetero_tp2_1 (port 8001, state: ready)
+2026-02-06 20:42:27,289 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 received generate request: bench_3_aime25_4, prompt_len=309
+2026-02-06 20:42:27,292 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_13_aime25_10', 'question_id': 'aime25_10', 'input_tokens': 221, 'actual_total_tokens': 20221, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,292 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_13_aime25_10', 'question_id': 'aime25_10', 'sequence_category': 'extra_long', 'input_tokens': 221, 'actual_total_tokens': 20221, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.09}
+2026-02-06 20:42:27,292 - src.benchmark.runner - INFO - Executing request bench_13_aime25_10 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,293 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_13_aime25_10, prompt_len=674
+2026-02-06 20:42:27,296 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_12_aime25_1', 'question_id': 'aime25_1', 'input_tokens': 164, 'actual_total_tokens': 12963, 'sequence_category': 'long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,296 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_12_aime25_1', 'question_id': 'aime25_1', 'sequence_category': 'long', 'input_tokens': 164, 'actual_total_tokens': 12963, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.19}
+2026-02-06 20:42:27,297 - src.benchmark.runner - INFO - Executing request bench_12_aime25_1 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,298 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_12_aime25_1, prompt_len=472
+2026-02-06 20:42:27,300 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_9_aime25_2', 'question_id': 'aime25_2', 'input_tokens': 132, 'actual_total_tokens': 8935, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,302 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_9_aime25_2', 'question_id': 'aime25_2', 'sequence_category': 'medium', 'input_tokens': 132, 'actual_total_tokens': 8935, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 1.33}
+2026-02-06 20:42:27,302 - src.benchmark.runner - INFO - Executing request bench_9_aime25_2 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:42:27,303 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_9_aime25_2, prompt_len=607
+2026-02-06 20:42:27,306 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_1_aime25_3', 'question_id': 'aime25_3', 'input_tokens': 78, 'actual_total_tokens': 11005, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,306 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_1_aime25_3', 'question_id': 'aime25_3', 'sequence_category': 'medium', 'input_tokens': 78, 'actual_total_tokens': 11005, 'target_instance_id': 'hetero_tp2_1', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.13}
+2026-02-06 20:42:27,307 - src.benchmark.runner - INFO - Executing request bench_1_aime25_3 on instance hetero_tp2_1 (port 8001, state: ready)
+2026-02-06 20:42:27,308 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 received generate request: bench_1_aime25_3, prompt_len=238
+2026-02-06 20:42:27,311 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_14_aime25_9', 'question_id': 'aime25_9', 'input_tokens': 263, 'actual_total_tokens': 3063, 'sequence_category': 'short', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,311 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_14_aime25_9', 'question_id': 'aime25_9', 'sequence_category': 'short', 'input_tokens': 263, 'actual_total_tokens': 3063, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.09}
+2026-02-06 20:42:27,312 - src.benchmark.runner - INFO - Executing request bench_14_aime25_9 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:42:27,313 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_14_aime25_9, prompt_len=731
+2026-02-06 20:42:27,316 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_11_aime25_13', 'question_id': 'aime25_13', 'input_tokens': 149, 'actual_total_tokens': 3261, 'sequence_category': 'short', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,316 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_11_aime25_13', 'question_id': 'aime25_13', 'sequence_category': 'short', 'input_tokens': 149, 'actual_total_tokens': 3261, 'target_instance_id': 'hetero_tp2_1', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.27}
+2026-02-06 20:42:27,317 - src.benchmark.runner - INFO - Executing request bench_11_aime25_13 on instance hetero_tp2_1 (port 8001, state: ready)
+2026-02-06 20:42:27,318 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 received generate request: bench_11_aime25_13, prompt_len=438
+2026-02-06 20:42:27,320 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_6_aime25_7', 'question_id': 'aime25_7', 'input_tokens': 118, 'actual_total_tokens': 5432, 'sequence_category': 'short', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,321 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_6_aime25_7', 'question_id': 'aime25_7', 'sequence_category': 'short', 'input_tokens': 118, 'actual_total_tokens': 5432, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.27}
+2026-02-06 20:42:27,321 - src.benchmark.runner - INFO - Executing request bench_6_aime25_7 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:42:27,322 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_6_aime25_7, prompt_len=372
+2026-02-06 20:42:27,325 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_8_aime25_11', 'question_id': 'aime25_11', 'input_tokens': 128, 'actual_total_tokens': 20128, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:42:27,325 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_8_aime25_11', 'question_id': 'aime25_11', 'sequence_category': 'extra_long', 'input_tokens': 128, 'actual_total_tokens': 20128, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.22}
+2026-02-06 20:42:27,326 - src.benchmark.runner - INFO - Executing request bench_8_aime25_11 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:42:27,327 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_8_aime25_11, prompt_len=496
+2026-02-06 20:42:27,339 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,349 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,353 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,361 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,362 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,363 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,364 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,365 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,365 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,366 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,368 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,371 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,382 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,382 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,384 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,385 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,386 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:27,388 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:42:57,370 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:42:57,384 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:42:57,398 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:43:27,417 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:43:27,426 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:43:27,432 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:   7%|▋         | 1/15 [01:02<14:33, 62.41s/it]2026-02-06 20:43:57,445 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:43:57,448 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:43:57,453 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  13%|█▎        | 2/15 [01:43<10:45, 49.62s/it]2026-02-06 20:44:27,468 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:44:27,479 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:44:27,485 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  20%|██        | 3/15 [02:05<07:27, 37.30s/it]Benchmark progress:  27%|██▋       | 4/15 [02:07<04:17, 23.44s/it]2026-02-06 20:44:57,495 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:44:57,501 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:44:57,505 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  33%|███▎      | 5/15 [02:54<05:18, 31.88s/it]2026-02-06 20:45:27,520 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:45:27,533 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:45:27,541 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:45:57,554 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:45:57,560 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:45:57,564 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:46:27,581 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:46:27,591 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:46:27,599 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:46:57,606 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:46:57,610 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:46:57,613 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:47:27,620 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:47:27,626 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:47:27,629 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:47:57,644 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:47:57,654 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:47:57,661 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  40%|████      | 6/15 [05:31<11:10, 74.49s/it]2026-02-06 20:48:27,680 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:48:27,690 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:48:27,699 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:48:57,716 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:48:57,727 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:48:57,735 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:49:27,748 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:49:27,755 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:49:27,762 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:49:57,777 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:49:57,786 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:49:57,794 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:50:27,810 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:50:27,819 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:50:27,826 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:50:57,835 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:50:57,842 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:50:57,847 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:51:27,854 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:51:27,861 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:51:27,865 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:51:57,877 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:51:57,885 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:51:57,895 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:52:27,905 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:52:27,911 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:52:27,916 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:52:57,926 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:52:57,935 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:52:57,942 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:53:27,951 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:53:27,959 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:53:27,970 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:53:57,980 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:53:57,985 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:53:57,991 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  47%|████▋     | 7/15 [11:39<22:41, 170.17s/it]Benchmark progress:  60%|██████    | 9/15 [12:00<09:18, 93.14s/it] Benchmark progress:  67%|██████▋   | 10/15 [12:00<05:46, 69.29s/it]2026-02-06 20:54:27,997 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:54:28,004 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:54:28,014 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  73%|███████▎  | 11/15 [12:26<03:50, 57.61s/it]Benchmark progress: 100%|██████████| 15/15 [12:26<00:00, 49.76s/it]
+2026-02-06 20:54:53,819 - src.benchmark.runner - INFO - Stopping instance pool...
+2026-02-06 20:54:53,820 - src.instance_manager.instance_pool - INFO - Stopping instance pool
+2026-02-06 20:55:02,476 - src.instance_manager.gpu_allocator - INFO - Released GPUs [0, 1] from instance hetero_tp2_0
+2026-02-06 20:55:02,478 - src.instance_manager.gpu_allocator - INFO - Released GPUs [2, 3] from instance hetero_tp2_1
+2026-02-06 20:55:02,479 - src.instance_manager.gpu_allocator - INFO - Released GPUs [4, 5, 6, 7] from instance hetero_tp4_0
+2026-02-06 20:55:02,480 - src.instance_manager.instance_pool - INFO - Instance pool stopped
+2026-02-06 20:55:02,497 - src.benchmark.runner - INFO - 
+==================================================
+2026-02-06 20:55:02,497 - src.benchmark.runner - INFO - Starting run 2/2
+2026-02-06 20:55:02,499 - src.benchmark.runner - INFO - ==================================================
+2026-02-06 20:55:02,501 - src.instance_manager.gpu_allocator - INFO - GPU Allocator initialized: 8 GPUs, 8 available
+2026-02-06 20:55:02,503 - src.scheduler.heterogeneous - INFO - Initialized HeterogeneousScheduler with input thresholds: {'short': 5000, 'medium': 10000, 'long': 15000}
+2026-02-06 20:55:02,504 - src.scheduler.heterogeneous - INFO - Total token thresholds: {'short': 6000, 'medium': 12000, 'long': 18000}
+2026-02-06 20:55:02,505 - src.scheduler.heterogeneous - INFO - Updated input thresholds: {'short': 5000, 'medium': 10000, 'long': 15000}
+2026-02-06 20:55:02,506 - src.scheduler.heterogeneous - INFO - Updated routing rule for short: preferred=[1, 2]
+2026-02-06 20:55:02,507 - src.scheduler.heterogeneous - INFO - Updated routing rule for medium: preferred=[2, 4]
+2026-02-06 20:55:02,507 - src.scheduler.heterogeneous - INFO - Updated routing rule for long: preferred=[4]
+2026-02-06 20:55:02,508 - src.scheduler.heterogeneous - INFO - Updated routing rule for extra_long: preferred=[4]
+2026-02-06 20:55:02,509 - src.benchmark.runner - INFO - Starting instance pool...
+2026-02-06 20:55:02,509 - src.instance_manager.instance_pool - INFO - Starting instance pool
+2026-02-06 20:55:02,510 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [0, 1] to instance hetero_tp2_0
+2026-02-06 20:55:02,511 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [2, 3] to instance hetero_tp2_1
+2026-02-06 20:55:02,512 - src.instance_manager.gpu_allocator - INFO - Allocated GPUs [4, 5, 6, 7] to instance hetero_tp4_0
+2026-02-06 20:55:02,512 - src.instance_manager.instance_pool - INFO - Starting instance hetero_tp2_0
+2026-02-06 20:55:02,513 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance hetero_tp2_0 on port 8000
+2026-02-06 20:55:02,514 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 21000
+2026-02-06 20:55:02,515 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8000 --host 127.0.0.1 --max-model-len 21000 --dtype auto --gpu-memory-utilization 0.95 --trust-remote-code --enforce-eager
+2026-02-06 20:55:02,516 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 0,1
+2026-02-06 20:55:02,534 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/vllm_logs/vllm_hetero_tp2_0.log
+2026-02-06 20:55:30,668 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 20:56:00,811 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 20:56:22,917 - src.instance_manager.vllm_instance - INFO - Health check passed after 41 attempts
+2026-02-06 20:56:23,095 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 is ready
+2026-02-06 20:56:23,095 - src.instance_manager.instance_pool - INFO - Starting instance hetero_tp2_1
+2026-02-06 20:56:23,095 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance hetero_tp2_1 on port 8001
+2026-02-06 20:56:23,095 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 21000
+2026-02-06 20:56:23,095 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 2 --port 8001 --host 127.0.0.1 --max-model-len 21000 --dtype auto --gpu-memory-utilization 0.95 --trust-remote-code --enforce-eager
+2026-02-06 20:56:23,096 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 2,3
+2026-02-06 20:56:23,099 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/vllm_logs/vllm_hetero_tp2_1.log
+2026-02-06 20:56:23,103 - src.instance_manager.vllm_instance - INFO - Health check passed after 1 attempts
+2026-02-06 20:56:23,194 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 is ready
+2026-02-06 20:56:23,194 - src.instance_manager.instance_pool - INFO - Starting instance hetero_tp4_0
+2026-02-06 20:56:23,194 - src.instance_manager.vllm_instance - INFO - Starting vLLM instance hetero_tp4_0 on port 8002
+2026-02-06 20:56:23,194 - src.instance_manager.vllm_instance - INFO - Model: /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, Max Model Len: 21000
+2026-02-06 20:56:23,194 - src.instance_manager.vllm_instance - INFO - Command: /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/bin/python -m vllm.entrypoints.openai.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --tensor-parallel-size 4 --port 8002 --host 127.0.0.1 --max-model-len 21000 --dtype auto --gpu-memory-utilization 0.95 --trust-remote-code --enforce-eager
+2026-02-06 20:56:23,195 - src.instance_manager.vllm_instance - INFO - CUDA_VISIBLE_DEVICES: 4,5,6,7
+2026-02-06 20:56:23,198 - src.instance_manager.vllm_instance - INFO - vLLM logs will be saved to: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/vllm_logs/vllm_hetero_tp4_0.log
+2026-02-06 20:56:51,321 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (28s elapsed, 15 checks)
+2026-02-06 20:57:21,454 - src.instance_manager.vllm_instance - INFO - Waiting for vLLM... (58s elapsed, 30 checks)
+2026-02-06 20:57:25,474 - src.instance_manager.vllm_instance - INFO - Health check passed after 32 attempts
+2026-02-06 20:57:25,633 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 is ready
+2026-02-06 20:57:25,633 - src.instance_manager.instance_pool - INFO - Instance pool started with 3 ready instances
+2026-02-06 20:57:25,634 - src.benchmark.runner - INFO - Running warmup (0 requests)...
+2026-02-06 20:57:25,635 - src.benchmark.runner - INFO - Warmup completed
+2026-02-06 20:57:25,637 - src.benchmark.runner - INFO - Running benchmark (15 requests)...
+
+============================================================
+Instance Pool Status
+============================================================
+State: running
+Total Instances: 3
+Ready: 3, Busy: 0, Error: 0
+Total Requests: 0, Failed: 0
+
+By TP Degree:
+  TP=2: 2/2 ready, 0 requests
+  TP=4: 1/1 ready, 0 requests
+
+Instance Details:
+  VLLMInstance(id=hetero_tp2_0, tp=2, gpus=[0, 1], state=ready)
+  VLLMInstance(id=hetero_tp2_1, tp=2, gpus=[2, 3], state=ready)
+  VLLMInstance(id=hetero_tp4_0, tp=4, gpus=[4, 5, 6, 7], state=ready)
+============================================================
+Benchmark progress:   0%|          | 0/15 [00:00<?, ?it/s]2026-02-06 20:57:25,641 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_5_aime25_5', 'question_id': 'aime25_5', 'input_tokens': 106, 'actual_total_tokens': 20106, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,641 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_5_aime25_5', 'question_id': 'aime25_5', 'sequence_category': 'extra_long', 'input_tokens': 106, 'actual_total_tokens': 20106, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.2}
+2026-02-06 20:57:25,642 - src.benchmark.runner - INFO - Executing request bench_5_aime25_5 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,643 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_5_aime25_5, prompt_len=343
+2026-02-06 20:57:25,646 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_10_aime25_6', 'question_id': 'aime25_6', 'input_tokens': 142, 'actual_total_tokens': 20142, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,646 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_10_aime25_6', 'question_id': 'aime25_6', 'sequence_category': 'extra_long', 'input_tokens': 142, 'actual_total_tokens': 20142, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.14}
+2026-02-06 20:57:25,647 - src.benchmark.runner - INFO - Executing request bench_10_aime25_6 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,647 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_10_aime25_6, prompt_len=546
+2026-02-06 20:57:25,650 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_7_aime25_8', 'question_id': 'aime25_8', 'input_tokens': 123, 'actual_total_tokens': 9595, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,651 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_7_aime25_8', 'question_id': 'aime25_8', 'sequence_category': 'medium', 'input_tokens': 123, 'actual_total_tokens': 9595, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.29}
+2026-02-06 20:57:25,651 - src.benchmark.runner - INFO - Executing request bench_7_aime25_8 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:57:25,652 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_7_aime25_8, prompt_len=423
+2026-02-06 20:57:25,655 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_1_aime25_3', 'question_id': 'aime25_3', 'input_tokens': 78, 'actual_total_tokens': 11005, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,655 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_1_aime25_3', 'question_id': 'aime25_3', 'sequence_category': 'medium', 'input_tokens': 78, 'actual_total_tokens': 11005, 'target_instance_id': 'hetero_tp2_1', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.29}
+2026-02-06 20:57:25,656 - src.benchmark.runner - INFO - Executing request bench_1_aime25_3 on instance hetero_tp2_1 (port 8001, state: ready)
+2026-02-06 20:57:25,657 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 received generate request: bench_1_aime25_3, prompt_len=238
+2026-02-06 20:57:25,659 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_12_aime25_1', 'question_id': 'aime25_1', 'input_tokens': 164, 'actual_total_tokens': 12963, 'sequence_category': 'long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,659 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_12_aime25_1', 'question_id': 'aime25_1', 'sequence_category': 'long', 'input_tokens': 164, 'actual_total_tokens': 12963, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.27}
+2026-02-06 20:57:25,660 - src.benchmark.runner - INFO - Executing request bench_12_aime25_1 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,661 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_12_aime25_1, prompt_len=472
+2026-02-06 20:57:25,663 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_13_aime25_10', 'question_id': 'aime25_10', 'input_tokens': 221, 'actual_total_tokens': 20221, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,664 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_13_aime25_10', 'question_id': 'aime25_10', 'sequence_category': 'extra_long', 'input_tokens': 221, 'actual_total_tokens': 20221, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.1}
+2026-02-06 20:57:25,664 - src.benchmark.runner - INFO - Executing request bench_13_aime25_10 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,665 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_13_aime25_10, prompt_len=674
+2026-02-06 20:57:25,669 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_2_aime25_14', 'question_id': 'aime25_14', 'input_tokens': 91, 'actual_total_tokens': 13985, 'sequence_category': 'long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,669 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_2_aime25_14', 'question_id': 'aime25_14', 'sequence_category': 'long', 'input_tokens': 91, 'actual_total_tokens': 13985, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.13}
+2026-02-06 20:57:25,670 - src.benchmark.runner - INFO - Executing request bench_2_aime25_14 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,671 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_2_aime25_14, prompt_len=283
+2026-02-06 20:57:25,673 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_4_aime25_12', 'question_id': 'aime25_12', 'input_tokens': 99, 'actual_total_tokens': 20099, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,674 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_4_aime25_12', 'question_id': 'aime25_12', 'sequence_category': 'extra_long', 'input_tokens': 99, 'actual_total_tokens': 20099, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.14}
+2026-02-06 20:57:25,675 - src.benchmark.runner - INFO - Executing request bench_4_aime25_12 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,675 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_4_aime25_12, prompt_len=479
+2026-02-06 20:57:25,679 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_9_aime25_2', 'question_id': 'aime25_2', 'input_tokens': 132, 'actual_total_tokens': 8935, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,679 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_9_aime25_2', 'question_id': 'aime25_2', 'sequence_category': 'medium', 'input_tokens': 132, 'actual_total_tokens': 8935, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.43}
+2026-02-06 20:57:25,680 - src.benchmark.runner - INFO - Executing request bench_9_aime25_2 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:57:25,681 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_9_aime25_2, prompt_len=607
+2026-02-06 20:57:25,683 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_3_aime25_4', 'question_id': 'aime25_4', 'input_tokens': 95, 'actual_total_tokens': 9683, 'sequence_category': 'medium', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,685 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_3_aime25_4', 'question_id': 'aime25_4', 'sequence_category': 'medium', 'input_tokens': 95, 'actual_total_tokens': 9683, 'target_instance_id': 'hetero_tp2_1', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 1.47}
+2026-02-06 20:57:25,686 - src.benchmark.runner - INFO - Executing request bench_3_aime25_4 on instance hetero_tp2_1 (port 8001, state: ready)
+2026-02-06 20:57:25,686 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 received generate request: bench_3_aime25_4, prompt_len=309
+2026-02-06 20:57:25,689 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_14_aime25_9', 'question_id': 'aime25_9', 'input_tokens': 263, 'actual_total_tokens': 3063, 'sequence_category': 'short', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,689 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_14_aime25_9', 'question_id': 'aime25_9', 'sequence_category': 'short', 'input_tokens': 263, 'actual_total_tokens': 3063, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.12}
+2026-02-06 20:57:25,690 - src.benchmark.runner - INFO - Executing request bench_14_aime25_9 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:57:25,691 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_14_aime25_9, prompt_len=731
+2026-02-06 20:57:25,693 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_6_aime25_7', 'question_id': 'aime25_7', 'input_tokens': 118, 'actual_total_tokens': 5432, 'sequence_category': 'short', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,693 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_6_aime25_7', 'question_id': 'aime25_7', 'sequence_category': 'short', 'input_tokens': 118, 'actual_total_tokens': 5432, 'target_instance_id': 'hetero_tp2_1', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.12}
+2026-02-06 20:57:25,694 - src.benchmark.runner - INFO - Executing request bench_6_aime25_7 on instance hetero_tp2_1 (port 8001, state: ready)
+2026-02-06 20:57:25,695 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_1 received generate request: bench_6_aime25_7, prompt_len=372
+2026-02-06 20:57:25,698 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_0_aime25_0', 'question_id': 'aime25_0', 'input_tokens': 53, 'actual_total_tokens': 20053, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,698 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_0_aime25_0', 'question_id': 'aime25_0', 'sequence_category': 'extra_long', 'input_tokens': 53, 'actual_total_tokens': 20053, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.11}
+2026-02-06 20:57:25,699 - src.benchmark.runner - INFO - Executing request bench_0_aime25_0 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,699 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_0_aime25_0, prompt_len=175
+2026-02-06 20:57:25,702 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_11_aime25_13', 'question_id': 'aime25_13', 'input_tokens': 149, 'actual_total_tokens': 3261, 'sequence_category': 'short', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,702 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_11_aime25_13', 'question_id': 'aime25_13', 'sequence_category': 'short', 'input_tokens': 149, 'actual_total_tokens': 3261, 'target_instance_id': 'hetero_tp2_0', 'target_tp_degree': 2, 'routing_type': 'preferred', 'queue_time_ms': 0.17}
+2026-02-06 20:57:25,704 - src.benchmark.runner - INFO - Executing request bench_11_aime25_13 on instance hetero_tp2_0 (port 8000, state: ready)
+2026-02-06 20:57:25,706 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp2_0 received generate request: bench_11_aime25_13, prompt_len=438
+2026-02-06 20:57:25,709 - src.scheduler.base_scheduler - INFO - Sequence Classification Result: {'request_id': 'bench_8_aime25_11', 'question_id': 'aime25_11', 'input_tokens': 128, 'actual_total_tokens': 20128, 'sequence_category': 'extra_long', 'classification_method': 'actual_total_tokens', 'has_profiling_data': True}
+2026-02-06 20:57:25,710 - src.scheduler.heterogeneous - INFO - Heterogeneous Routing Result: {'request_id': 'bench_8_aime25_11', 'question_id': 'aime25_11', 'sequence_category': 'extra_long', 'input_tokens': 128, 'actual_total_tokens': 20128, 'target_instance_id': 'hetero_tp4_0', 'target_tp_degree': 4, 'routing_type': 'preferred', 'queue_time_ms': 0.26}
+2026-02-06 20:57:25,711 - src.benchmark.runner - INFO - Executing request bench_8_aime25_11 on instance hetero_tp4_0 (port 8002, state: ready)
+2026-02-06 20:57:25,711 - src.instance_manager.vllm_instance - INFO - Instance hetero_tp4_0 received generate request: bench_8_aime25_11, prompt_len=496
+2026-02-06 20:57:25,736 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,744 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,745 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,748 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,749 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8001/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,751 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,752 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,752 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,754 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,756 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,763 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,764 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,766 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,768 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,769 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,771 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,772 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8002/v1/completions "HTTP/1.1 200 OK"
+2026-02-06 20:57:25,773 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:57:55,787 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:57:55,798 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:57:55,805 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:   7%|▋         | 1/15 [00:40<09:28, 40.64s/it]2026-02-06 20:58:25,821 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:58:25,835 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:58:25,842 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 20:58:55,857 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:58:55,867 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:58:55,875 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  13%|█▎        | 2/15 [01:30<09:59, 46.09s/it]Benchmark progress:  20%|██        | 3/15 [01:35<05:26, 27.24s/it]2026-02-06 20:59:25,884 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:59:25,890 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:59:25,894 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  27%|██▋       | 4/15 [02:01<04:55, 26.86s/it]2026-02-06 20:59:55,902 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 20:59:55,908 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 20:59:55,913 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:00:25,924 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:00:25,931 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:00:25,937 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:00:55,945 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:00:55,950 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:00:55,955 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:01:25,974 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:01:25,986 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:01:25,994 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  33%|███▎      | 5/15 [04:04<10:13, 61.32s/it]2026-02-06 21:01:56,011 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:01:56,022 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:01:56,031 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:02:26,045 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:02:26,054 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:02:26,062 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  40%|████      | 6/15 [05:09<09:24, 62.77s/it]2026-02-06 21:02:56,070 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:02:56,074 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:02:56,078 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:03:26,088 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:03:26,092 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:03:26,097 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  47%|████▋     | 7/15 [06:24<08:54, 66.83s/it]2026-02-06 21:03:56,103 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:03:56,108 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:03:56,112 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  53%|█████▎    | 8/15 [06:37<05:47, 49.66s/it]2026-02-06 21:04:26,127 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:04:26,137 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:04:26,143 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:04:56,160 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:04:56,172 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:04:56,181 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:05:26,205 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:05:26,219 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:05:26,228 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:05:56,251 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:05:56,261 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:05:56,267 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:06:26,276 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:06:26,280 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:06:26,285 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:06:56,307 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:06:56,321 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:06:56,329 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:07:26,338 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:07:26,344 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:07:26,351 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:07:56,367 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:07:56,381 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:07:56,390 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:08:26,409 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:08:26,418 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:08:26,425 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+2026-02-06 21:08:56,448 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:08:56,460 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:08:56,469 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress:  60%|██████    | 9/15 [11:34<12:42, 127.05s/it]Benchmark progress:  80%|████████  | 12/15 [11:36<02:44, 54.68s/it]Benchmark progress:  87%|████████▋ | 13/15 [11:37<01:25, 42.99s/it]Benchmark progress:  93%|█████████▎| 14/15 [11:54<00:37, 37.01s/it]2026-02-06 21:09:26,478 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8000/health "HTTP/1.1 200 OK"
+2026-02-06 21:09:26,481 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8001/health "HTTP/1.1 200 OK"
+2026-02-06 21:09:26,484 - httpx - INFO - HTTP Request: GET http://127.0.0.1:8002/health "HTTP/1.1 200 OK"
+Benchmark progress: 100%|██████████| 15/15 [12:15<00:00, 32.88s/it]Benchmark progress: 100%|██████████| 15/15 [12:15<00:00, 49.00s/it]
+2026-02-06 21:09:40,887 - src.benchmark.runner - INFO - Stopping instance pool...
+2026-02-06 21:09:40,887 - src.instance_manager.instance_pool - INFO - Stopping instance pool
+2026-02-06 21:09:49,200 - src.instance_manager.gpu_allocator - INFO - Released GPUs [0, 1] from instance hetero_tp2_0
+2026-02-06 21:09:49,200 - src.instance_manager.gpu_allocator - INFO - Released GPUs [2, 3] from instance hetero_tp2_1
+2026-02-06 21:09:49,201 - src.instance_manager.gpu_allocator - INFO - Released GPUs [4, 5, 6, 7] from instance hetero_tp4_0
+2026-02-06 21:09:49,202 - src.instance_manager.instance_pool - INFO - Instance pool stopped
+2026-02-06 21:09:49,215 - src.benchmark.runner - INFO - 
+Scenario config_based_heterogeneous completed
+2026-02-06 21:09:49,216 - __main__ - INFO - config_based_heterogeneous completed: 263.26 tokens/s
+2026-02-06 21:09:49,217 - __main__ - INFO -   Routing stats (run 1):
+2026-02-06 21:09:49,217 - __main__ - INFO -     Preferred routes: 15
+2026-02-06 21:09:49,217 - __main__ - INFO -     Fallback routes: 0
+2026-02-06 21:09:49,218 - __main__ - INFO -     By TP: {4: 8, 2: 7}
+2026-02-06 21:09:49,218 - __main__ - INFO -   Routing stats (run 2):
+2026-02-06 21:09:49,218 - __main__ - INFO -     Preferred routes: 15
+2026-02-06 21:09:49,219 - __main__ - INFO -     Fallback routes: 0
+2026-02-06 21:09:49,219 - __main__ - INFO -     By TP: {4: 8, 2: 7}
+2026-02-06 21:09:49,219 - __main__ - INFO - 
+============================================================
+2026-02-06 21:09:49,219 - __main__ - INFO - Generating analysis report...
+2026-02-06 21:09:49,219 - __main__ - INFO - ============================================================
+2026-02-06 21:09:49,239 - src.analysis.report_generator - INFO - Generating full benchmark report...
+/research/d1/gds/ytyang/kwchen/hetero_rollout/src/analysis/report_generator.py:189: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+2026-02-06 21:09:50,490 - matplotlib.category - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-02-06 21:09:50,490 - matplotlib.category - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-02-06 21:09:50,493 - matplotlib.category - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-02-06 21:09:50,494 - matplotlib.category - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-02-06 21:09:50,757 - src.analysis.report_generator - INFO - Report generated: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/analysis/benchmark_report.md
+2026-02-06 21:09:50,757 - __main__ - INFO - 
+Report generated: /research/d1/gds/ytyang/kwchen/hetero_rollout/results/test_hetero/analysis/benchmark_report.md
+2026-02-06 21:09:50,796 - __main__ - INFO - 
+============================================================
+2026-02-06 21:09:50,797 - __main__ - INFO - Benchmark completed successfully!
+2026-02-06 21:09:50,797 - __main__ - INFO - ============================================================
+2026-02-06 21:09:50,797 - __main__ - INFO -   config_based_heterogeneous: 263.26 tokens/s, 470286.32 ms latency, 100.0% success rate
+
+============================================================
+Scenario Summary: config_based_heterogeneous
+============================================================
+Runs: 2 (2 successful)
+
+Performance Metrics (averaged over 2 runs):
+  Throughput: 263.26 tokens/s
+  Latency:    470286.32 ms (mean)
+  TTFT:       225.50 ms (mean)
+  TPOT:       36.42 ms (mean)
+
+Total Requests: 30
+Success Rate:   100.00%
+============================================================
+
+================================================================================
+Benchmark Results Summary
+================================================================================
+
+config_based_heterogeneous (heterogeneous)
+  Throughput: 263.26 tokens/s
+  Latency: 470286.32 ms (p99: 746366.94)
+  TTFT: 225.50 ms, TPOT: 36.42 ms
+================================================================================

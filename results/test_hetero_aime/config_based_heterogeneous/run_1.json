@@ -1,0 +1,110 @@
+{
+  "run_id": 1,
+  "scenario_name": "config_based_heterogeneous",
+  "success": true,
+  "duration": 877.7314765453339,
+  "error_message": "",
+  "metrics": {
+    "scenario_name": "config_based_heterogeneous",
+    "run_id": 1,
+    "start_time": "2026-02-06T20:42:27.247795",
+    "end_time": "2026-02-06T20:54:53.651972",
+    "duration_seconds": 746.4041776657104,
+    "total_requests": 15,
+    "successful_requests": 15,
+    "failed_requests": 0,
+    "total_input_tokens": 1962,
+    "total_output_tokens": 205256,
+    "throughput_tokens_per_second": 274.99310178288863,
+    "requests_per_second": 0.020096350541486386,
+    "ttft_mean": 222.08452224731445,
+    "ttft_std": 40.744404041231235,
+    "ttft_p50": 220.97229957580566,
+    "ttft_p90": 270.0909614562988,
+    "ttft_p99": 278.91160011291504,
+    "tpot_mean": 36.68915923238837,
+    "tpot_std": 1.088983550927719,
+    "tpot_p50": 37.31791651016989,
+    "tpot_p90": 38.057179618012334,
+    "tpot_p99": 38.244265343000386,
+    "latency_mean": 499757.3953151703,
+    "latency_std": 287712.7890504442,
+    "latency_p50": 699050.7221221924,
+    "latency_p90": 746351.8780708313,
+    "latency_p99": 746369.5676374435,
+    "gpu_memory_peak_gb": 76.6759033203125,
+    "gpu_utilization_mean": 83.65380727762803,
+    "per_instance_metrics": {
+      "hetero_tp4_0": {
+        "request_count": 8,
+        "tp_degree": 4,
+        "total_tokens": 107652,
+        "latency_mean": 503129.892796278,
+        "latency_p50": 746327.30281353,
+        "latency_p99": 746370.7935833931,
+        "throughput_mean": 26.55487745101551
+      },
+      "hetero_tp2_0": {
+        "request_count": 4,
+        "tp_degree": 2,
+        "total_tokens": 48280,
+        "latency_mean": 435327.8342485428,
+        "latency_p50": 447547.9428768158,
+        "latency_p99": 720553.3840847015,
+        "throughput_mean": 27.72093604265943
+      },
+      "hetero_tp2_1": {
+        "request_count": 3,
+        "tp_degree": 2,
+        "total_tokens": 49324,
+        "latency_mean": 576670.1501210531,
+        "latency_p50": 699041.3150787354,
+        "latency_p99": 699050.5339813232,
+        "throughput_mean": 28.512253634693266
+      }
+    },
+    "scheduling_success_rate": 1.0,
+    "avg_queue_time": 0.00026812553405761717
+  },
+  "scheduler_stats": {
+    "total_requests": 15,
+    "successful_schedules": 15,
+    "failed_schedules": 0,
+    "success_rate": 1.0,
+    "avg_queue_time": 0.00026812553405761717,
+    "max_queue_time": 0.001329183578491211,
+    "by_category": {
+      "long": 2,
+      "extra_long": 6,
+      "medium": 4,
+      "short": 3
+    },
+    "by_tp_degree": {
+      "4": 8,
+      "2": 7
+    },
+    "by_instance": {
+      "hetero_tp4_0": 8,
+      "hetero_tp2_0": 4,
+      "hetero_tp2_1": 3
+    },
+    "preferred_routes": 15,
+    "fallback_routes": 0,
+    "preferred_rate": 1.0,
+    "category_to_tp": {
+      "long": {
+        "4": 2
+      },
+      "extra_long": {
+        "4": 6
+      },
+      "medium": {
+        "2": 4
+      },
+      "short": {
+        "2": 3
+      }
+    }
+  },
+  "request_count": 15
+}

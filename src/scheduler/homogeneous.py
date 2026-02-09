@@ -88,6 +88,18 @@ class HomogeneousScheduler(BaseScheduler):
                 reason=f"No available instances with TP={self.tp_degree}"
             )
             self.record_result(result)
+            
+            # 记录同构调度失败信息
+            failure_info = {
+                "request_id": request.request_id,
+                "question_id": request.question_id,
+                "sequence_category": request.sequence_category,
+                "target_tp_degree": self.tp_degree,
+                "reason": f"No available instances with TP={self.tp_degree}",
+                "available_instances_count": len(available_instances)
+            }
+            logger.warning(f"Homogeneous Routing Failed: {failure_info}")
+            
             return result
         
         # Select instance using load balancer
@@ -120,7 +132,20 @@ class HomogeneousScheduler(BaseScheduler):
         )
         
         self.record_result(result)
-        logger.debug(f"Scheduled {request.request_id} -> {selected.instance_id}")
+        
+        # 记录详细的同构调度结果到日志
+        routing_info = {
+            "request_id": request.request_id,
+            "question_id": request.question_id,
+            "sequence_category": request.sequence_category,
+            "input_tokens": request.input_tokens,
+            "actual_total_tokens": request.actual_total_tokens,
+            "target_instance_id": selected.instance_id,
+            "target_tp_degree": selected.tp_degree,
+            "load_balance_strategy": self.strategy.value,
+            "queue_time_ms": round(request.get_queue_time() * 1000, 2)
+        }
+        logger.info(f"Homogeneous Routing Result: {routing_info}")
         
         return result
     

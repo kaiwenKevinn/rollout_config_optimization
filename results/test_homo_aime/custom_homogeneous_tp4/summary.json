@@ -1,0 +1,47 @@
+{
+  "scenario": {
+    "name": "custom_homogeneous_tp4",
+    "type": "homogeneous",
+    "description": "Custom homogeneous: 2 instances with TP=4",
+    "instances": [
+      {
+        "instance_id": "custom_homo_tp4_0",
+        "tp_degree": 4,
+        "gpu_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "description": "TP=4 instance 0"
+      },
+      {
+        "instance_id": "custom_homo_tp4_1",
+        "tp_degree": 4,
+        "gpu_ids": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "description": "TP=4 instance 1"
+      }
+    ],
+    "num_runs": 2,
+    "warmup_requests": 0,
+    "max_concurrent_requests": 15,
+    "total_gpus": 8,
+    "instance_count": 2,
+    "tp_distribution": {
+      "4": 2
+    }
+  },
+  "num_runs": 2,
+  "successful_runs": 2,
+  "avg_throughput_tokens_per_second": 199.71667711088108,
+  "avg_latency_ms": 374830.837893486,
+  "avg_ttft_ms": 289.4536892573039,
+  "avg_tpot_ms": 37.63658351849102,
+  "total_requests": 30,
+  "success_rate": 1.0
+}

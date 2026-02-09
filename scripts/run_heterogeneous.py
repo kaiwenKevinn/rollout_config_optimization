@@ -31,6 +31,7 @@ from src.benchmark.scenarios import (
     HETEROGENEOUS_MIX_2,
     HETEROGENEOUS_MIX_3,
     create_custom_heterogeneous_scenario,
+    create_scenario_from_config,
     get_heterogeneous_scenarios,
     print_scenario_info
 )
@@ -68,7 +69,8 @@ async def run_heterogeneous_benchmark(
     num_runs: int = 3,
     profiling_dir: str = None,
     save_vllm_logs: bool = True,
-    exclude_tp1: bool = False
+    exclude_tp1: bool = False,
+    use_config_hetero: bool = False
 ):
     """Run heterogeneous benchmarks for specified scenarios.
     
@@ -84,9 +86,9 @@ async def run_heterogeneous_benchmark(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     
-    # 如果提供了profiling目录，则使用自适应配置
+    # 如果提供了profiling目录且未强制使用配置文件，则使用自适应配置
     adaptive_configs = None
-    if profiling_dir and Path(profiling_dir).exists():
+    if profiling_dir and Path(profiling_dir).exists() and not use_config_hetero:
         logger.info(f"Loading profiling results from: {profiling_dir}")
         try:
             profiling_loader = ProfilingResultsLoader(profiling_dir)
@@ -134,10 +136,10 @@ async def run_heterogeneous_benchmark(
     profiler.print_summary()
     
     # Show sequence distribution for routing analysis
-    by_category = profiler.get_sequences_by_category()
-    logger.info("\nSequence distribution for routing:")
-    for cat, seqs in sorted(by_category.items()):
-        logger.info(f"  {cat}: {len(seqs)} sequences")
+    # by_category = profiler.get_sequences_by_category()
+    # logger.info("\nSequence distribution for routing:")
+    # for cat, seqs in sorted(by_category.items()):
+    #     logger.info(f"  {cat}: {len(seqs)} sequences")
     
     # Create benchmark runner
     # Add vLLM log directory to config if needed
@@ -150,7 +152,8 @@ async def run_heterogeneous_benchmark(
         config=config,
         dataset_loader=loader,
         sequence_profiler=profiler,
-        output_dir=str(output_path)
+        output_dir=str(output_path),
+        profiling_dir=profiling_dir
     )
     
     benchmark_config = config.get("benchmark", {})
@@ -253,8 +256,62 @@ async def run_heterogeneous_benchmark(
     return runner.get_results()
 
 
-def get_predefined_scenarios(scenario_names: list):
-    """Get predefined scenarios by name."""
+def get_config_heterogeneous_scenarios(config: dict) -> list:
+    """从配置文件中获取异构场景配置。
+    
+    Args:
+        config: 配置字典
+        
+    Returns:
+        异构场景配置列表
+    """
+    logger = logging.getLogger(__name__)
+    
+    tp_configs = config.get("tp_configs", {})
+    benchmark_config = config.get("benchmark", {})
+    scheduling_config = config.get("scheduling", {})
+    
+    # 检查是否有异构配置
+    heterogeneous_configs = tp_configs.get("heterogeneous", [])
+    
+    if not heterogeneous_configs:
+        logger.info("No heterogeneous configurations found in config file")
+        return []
+    
+    logger.info(f"Found {len(heterogeneous_configs)} heterogeneous instance configurations in config")
+    
+    # 转换配置格式以匹配create_custom_heterogeneous_scenario期望的格式
+    instance_configs = []
+    for idx, cfg in enumerate(heterogeneous_configs):
+        # 从配置中提取必要的字段
+        instance_config = {
+            "tp": cfg.get("tp", 1),
+            "gpus": cfg.get("gpus", [idx]),
+            "instance_id": cfg.get("instance_id", f"config_hetero_{idx}")
+        }
+        instance_configs.append(instance_config)
+        
+        logger.info(f"  Instance {idx}: TP={instance_config['tp']}, GPUs={instance_config['gpus']}")
+        if "description" in cfg:
+            logger.info(f"    Description: {cfg['description']}")
+    
+    # 创建场景
+    scenario = create_custom_heterogeneous_scenario(
+        instance_configs=instance_configs,
+        name="config_based_heterogeneous",
+        description="Heterogeneous configuration loaded from config file",
+        length_thresholds=scheduling_config.get("length_thresholds"),
+        routing_rules=scheduling_config.get("routing_rules"),
+        num_runs=benchmark_config.get("num_runs", 3),
+        warmup_requests=benchmark_config.get("warmup_requests", 5),
+        max_concurrent_requests=benchmark_config.get("max_concurrent_requests", 32)
+    )
+    
+    return [scenario]
+
+
+def get_predefined_scenarios(scenario_names: list, config: dict = None):
+    """Get predefined scenarios by name, with support for config-based scenarios."""
     all_scenarios = {
         "mix1": HETEROGENEOUS_MIX_1,
         "mix2": HETEROGENEOUS_MIX_2,
@@ -267,13 +324,31 @@ def get_predefined_scenarios(scenario_names: list):
     scenarios = []
     for name in scenario_names:
         if name.lower() == "all":
-            return list(get_heterogeneous_scenarios())
+            # 先添加预定义场景
+            predefined = list(get_heterogeneous_scenarios())
+            
+            # 如果有配置文件且包含异构配置，则添加配置中的场景
+            if config:
+                config_scenarios = get_config_heterogeneous_scenarios(config)
+                if config_scenarios:
+                    predefined.extend(config_scenarios)
+            
+            return predefined
         
+        # 首先检查预定义场景
         scenario = all_scenarios.get(name.lower())
         if scenario:
             scenarios.append(scenario)
         else:
-            print(f"Warning: Unknown scenario '{name}'")
+            # 尝试从配置创建场景
+            if config:
+                config_scenario = create_scenario_from_config(config, name)
+                if config_scenario and config_scenario.scenario_type.name == "HETEROGENEOUS":
+                    scenarios.append(config_scenario)
+                else:
+                    print(f"Warning: Unknown scenario '{name}'")
+            else:
+                print(f"Warning: Unknown scenario '{name}'")
     
     return scenarios
 
@@ -350,6 +425,12 @@ def main():
         default=False,
         help="Exclude TP=1 configurations when using adaptive mode"
     )
+    parser.add_argument(
+        "--use-config-hetero",
+        action="store_true",
+        default=False,
+        help="Use heterogeneous configurations from config file instead of predefined scenarios"
+    )
     
     args = parser.parse_args()
     
@@ -381,8 +462,15 @@ def main():
             length_thresholds=custom_config.get("length_thresholds"),
             routing_rules=custom_config.get("routing_rules")
         )]
+    elif args.use_config_hetero:
+        # 使用配置文件中的异构配置
+        config_scenarios = get_config_heterogeneous_scenarios(config)
+        if not config_scenarios:
+            print("Error: No heterogeneous configurations found in config file")
+            sys.exit(1)
+        scenarios = config_scenarios
     else:
-        scenarios = get_predefined_scenarios(args.scenarios)
+        scenarios = get_predefined_scenarios(args.scenarios, config)
     
     if not scenarios:
         print("Error: No valid scenarios specified")
@@ -400,6 +488,16 @@ def main():
     if args.profiling_dir:
         logger.info(f"Profiling directory: {args.profiling_dir}")
     
+    # 显示配置中的异构实例信息
+    tp_configs = config.get("tp_configs", {})
+    heterogeneous_configs = tp_configs.get("heterogeneous", [])
+    if heterogeneous_configs:
+        logger.info("\nConfig-based Heterogeneous Instances:")
+        for idx, cfg in enumerate(heterogeneous_configs):
+            logger.info(f"  Instance {idx}: TP={cfg.get('tp', 1)}, GPUs={cfg.get('gpus', [idx])}")
+            if "description" in cfg:
+                logger.info(f"    Description: {cfg['description']}")
+    
     scheduling_config = config.get("scheduling", {})
     logger.info(f"Length thresholds: {scheduling_config.get('length_thresholds', {})}")
     logger.info(f"Routing rules: {scheduling_config.get('routing_rules', {})}")
@@ -415,7 +513,8 @@ def main():
             num_runs=args.runs,
             profiling_dir=args.profiling_dir,
             save_vllm_logs=args.save_vllm_logs,
-            exclude_tp1=args.exclude_tp1
+            exclude_tp1=args.exclude_tp1,
+            use_config_hetero=args.use_config_hetero
         ))
         
         logger.info("\n" + "=" * 60)

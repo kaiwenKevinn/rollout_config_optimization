@@ -1,0 +1,91 @@
+{
+  "run_id": 1,
+  "scenario_name": "heterogeneous_mix_2",
+  "success": true,
+  "duration": 0.8904745578765869,
+  "error_message": "",
+  "metrics": {
+    "scenario_name": "heterogeneous_mix_2",
+    "run_id": 1,
+    "start_time": "2026-02-06T20:25:06.181380",
+    "end_time": "2026-02-06T20:25:06.315676",
+    "duration_seconds": 0.13429617881774902,
+    "total_requests": 15,
+    "successful_requests": 15,
+    "failed_requests": 0,
+    "total_input_tokens": 1962,
+    "total_output_tokens": 0,
+    "throughput_tokens_per_second": 0.0,
+    "requests_per_second": 111.69342368524302,
+    "ttft_mean": 87.7280871073405,
+    "ttft_std": 11.662874683096264,
+    "ttft_p50": 85.47401428222656,
+    "ttft_p90": 103.10811996459961,
+    "ttft_p99": 110.84865093231201,
+    "tpot_mean": 0,
+    "tpot_std": 0,
+    "tpot_p50": 0,
+    "tpot_p90": 0,
+    "tpot_p99": 0,
+    "latency_mean": 87.7280871073405,
+    "latency_std": 11.662874683096264,
+    "latency_p50": 85.47401428222656,
+    "latency_p90": 103.10811996459961,
+    "latency_p99": 110.84865093231201,
+    "gpu_memory_peak_gb": 76.6739501953125,
+    "gpu_utilization_mean": 60.0,
+    "per_instance_metrics": {
+      "hetero_tp2_0": {
+        "request_count": 8,
+        "tp_degree": 2,
+        "total_tokens": 0,
+        "latency_mean": 87.75267004966736,
+        "latency_p50": 86.80438995361328,
+        "latency_p99": 110.63978433609009,
+        "throughput_mean": 0.0
+      },
+      "hetero_tp2_1": {
+        "request_count": 7,
+        "tp_degree": 2,
+        "total_tokens": 0,
+        "latency_mean": 87.6999923161098,
+        "latency_p50": 85.47401428222656,
+        "latency_p99": 105.06399154663086,
+        "throughput_mean": 0.0
+      }
+    },
+    "scheduling_success_rate": 1.0,
+    "avg_queue_time": 0.0007105509440104167
+  },
+  "scheduler_stats": {
+    "total_requests": 15,
+    "successful_schedules": 15,
+    "failed_schedules": 0,
+    "success_rate": 1.0,
+    "avg_queue_time": 0.0007105509440104167,
+    "max_queue_time": 0.004004955291748047,
+    "by_category": {
+      "short": 14,
+      "medium": 1
+    },
+    "by_tp_degree": {
+      "2": 15
+    },
+    "by_instance": {
+      "hetero_tp2_0": 8,
+      "hetero_tp2_1": 7
+    },
+    "preferred_routes": 15,
+    "fallback_routes": 0,
+    "preferred_rate": 1.0,
+    "category_to_tp": {
+      "short": {
+        "2": 14
+      },
+      "medium": {
+        "2": 1
+      }
+    }
+  },
+  "request_count": 15
+}

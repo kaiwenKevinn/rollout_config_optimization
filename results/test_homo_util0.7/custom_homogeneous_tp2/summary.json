@@ -1,0 +1,61 @@
+{
+  "scenario": {
+    "name": "custom_homogeneous_tp2",
+    "type": "homogeneous",
+    "description": "Custom homogeneous: 4 instances with TP=2",
+    "instances": [
+      {
+        "instance_id": "custom_homo_tp2_0",
+        "tp_degree": 2,
+        "gpu_ids": [
+          0,
+          1
+        ],
+        "description": "TP=2 instance 0"
+      },
+      {
+        "instance_id": "custom_homo_tp2_1",
+        "tp_degree": 2,
+        "gpu_ids": [
+          2,
+          3
+        ],
+        "description": "TP=2 instance 1"
+      },
+      {
+        "instance_id": "custom_homo_tp2_2",
+        "tp_degree": 2,
+        "gpu_ids": [
+          4,
+          5
+        ],
+        "description": "TP=2 instance 2"
+      },
+      {
+        "instance_id": "custom_homo_tp2_3",
+        "tp_degree": 2,
+        "gpu_ids": [
+          6,
+          7
+        ],
+        "description": "TP=2 instance 3"
+      }
+    ],
+    "num_runs": 2,
+    "warmup_requests": 5,
+    "max_concurrent_requests": 15,
+    "total_gpus": 8,
+    "instance_count": 4,
+    "tp_distribution": {
+      "2": 4
+    }
+  },
+  "num_runs": 2,
+  "successful_runs": 2,
+  "avg_throughput_tokens_per_second": 207.83487447634485,
+  "avg_latency_ms": 435859.95647907257,
+  "avg_ttft_ms": 153.28930219014484,
+  "avg_tpot_ms": 36.20304581873178,
+  "total_requests": 30,
+  "success_rate": 1.0
+}

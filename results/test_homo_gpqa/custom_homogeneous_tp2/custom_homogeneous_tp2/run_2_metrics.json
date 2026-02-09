@@ -1,0 +1,71 @@
+{
+  "scenario_name": "custom_homogeneous_tp2",
+  "run_id": 2,
+  "start_time": "2026-02-07T14:48:09.792121",
+  "end_time": "2026-02-07T17:30:09.716116",
+  "duration_seconds": 9719.923994541168,
+  "total_requests": 198,
+  "successful_requests": 198,
+  "failed_requests": 0,
+  "total_input_tokens": 51183,
+  "total_output_tokens": 6496692,
+  "throughput_tokens_per_second": 668.3891770808726,
+  "requests_per_second": 0.02037052965755692,
+  "ttft_mean": 2000.7451736565793,
+  "ttft_std": 378.8749475739142,
+  "ttft_p50": 2039.183259010315,
+  "ttft_p90": 2439.2998456954956,
+  "ttft_p99": 2681.981635093689,
+  "tpot_mean": 133.27617476140475,
+  "tpot_std": 130.81714354331066,
+  "tpot_p50": 110.19872640322384,
+  "tpot_p90": 213.54843432925435,
+  "tpot_p99": 526.4707092317379,
+  "latency_mean": 4127639.3728472968,
+  "latency_std": 2528812.362012876,
+  "latency_p50": 3946206.7886590958,
+  "latency_p90": 7340346.733951572,
+  "latency_p99": 9493571.212894917,
+  "gpu_memory_peak_gb": 76.67742919921875,
+  "gpu_utilization_mean": 78.77020868934804,
+  "per_instance_metrics": {
+    "custom_homo_tp2_0": {
+      "request_count": 50,
+      "tp_degree": 2,
+      "total_tokens": 1641086,
+      "latency_mean": 3542921.6562747955,
+      "latency_p50": 3535554.667711258,
+      "latency_p99": 6702470.222299099,
+      "throughput_mean": 11.839653693581234
+    },
+    "custom_homo_tp2_1": {
+      "request_count": 50,
+      "tp_degree": 2,
+      "total_tokens": 1565573,
+      "latency_mean": 4305919.002070427,
+      "latency_p50": 4140414.423942566,
+      "latency_p99": 9224094.654023647,
+      "throughput_mean": 10.987306283890737
+    },
+    "custom_homo_tp2_3": {
+      "request_count": 49,
+      "tp_degree": 2,
+      "total_tokens": 1635126,
+      "latency_mean": 3688784.0945185446,
+      "latency_p50": 3637658.59746933,
+      "latency_p99": 6768969.832839966,
+      "throughput_mean": 11.662025434306123
+    },
+    "custom_homo_tp2_2": {
+      "request_count": 49,
+      "tp_degree": 2,
+      "total_tokens": 1654907,
+      "latency_mean": 4981227.393369285,
+      "latency_p50": 5348217.388868332,
+      "latency_p99": 9682776.697893143,
+      "throughput_mean": 10.271445316589796
+    }
+  },
+  "scheduling_success_rate": 1.0,
+  "avg_queue_time": 0.0005074570877383453
+}

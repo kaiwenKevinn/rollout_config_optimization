@@ -161,6 +161,7 @@ class VLLMInstance:
             
             logger.info(f"Command: {' '.join(cmd)}")
             logger.info(f"CUDA_VISIBLE_DEVICES: {env['CUDA_VISIBLE_DEVICES']}")
+            logger.info(f"Instance {self.instance_id} GPU assignment: {self.gpu_ids}")
             
             # Setup log file if log_dir is specified
             if self.config.log_dir:
@@ -284,7 +285,11 @@ class VLLMInstance:
     
     async def generate(self, prompt: str, params: Optional[GenerationParams] = None,
                       request_id: Optional[str] = None) -> GenerationResult:
+        # 记录收到请求的日志
+        logger.info(f"Instance {self.instance_id} received generate request: {request_id}, prompt_len={len(prompt)}")
+        
         if not self.is_ready:
+            logger.warning(f"Instance {self.instance_id} is not ready (state: {self._state.value})")
             return GenerationResult(request_id=request_id or "", prompt=prompt,
                                    generated_text="", input_tokens=0, output_tokens=0,
                                    finish_reason="error", success=False,

@@ -1,0 +1,175 @@
+{
+  "timestamp": "2026-02-06T20:25:04.248370",
+  "random_seed": 42,
+  "config": {
+    "model": {
+      "name": "/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137",
+      "max_model_len": 21000,
+      "dtype": "auto",
+      "trust_remote_code": true,
+      "enable_thinking": true,
+      "gpu_memory_utilization": 0.95
+    },
+    "dataset": {
+      "type": "aime25",
+      "name": "opencompass/AIME2025",
+      "subset": "AIME2025-I",
+      "split": "test",
+      "cache_dir": "./datasets",
+      "max_samples": null,
+      "prompt_style": "detailed"
+    },
+    "gpu": {
+      "total_gpus": 8,
+      "available_gpus": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "tp_configs": {
+      "homogeneous": [
+        {
+          "tp": 2,
+          "instances": 4,
+          "description": "4 instances with TP=2"
+        },
+        {
+          "tp": 4,
+          "instances": 2,
+          "description": "2 instances with TP=4"
+        }
+      ],
+      "heterogeneous": [
+        {
+          "instance_id": "hetero_tp1_0",
+          "tp": 1,
+          "gpus": [
+            0
+          ],
+          "description": "TP=1 instance for medium sequences"
+        },
+        {
+          "instance_id": "hetero_tp1_1",
+          "tp": 1,
+          "gpus": [
+            1
+          ],
+          "description": "TP=1 instance for medium sequences"
+        },
+        {
+          "instance_id": "hetero_tp2_0",
+          "tp": 2,
+          "gpus": [
+            2,
+            3
+          ],
+          "description": "TP=2 instance for short sequences"
+        },
+        {
+          "instance_id": "hetero_tp4_0",
+          "tp": 4,
+          "gpus": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "description": "TP=4  instance for long sequences"
+        }
+      ]
+    },
+    "scheduling": {
+      "length_thresholds": {
+        "short": 5000,
+        "medium": 10000,
+        "long": 15000
+      },
+      "total_length_thresholds": {
+        "short": 6000,
+        "medium": 12000,
+        "long": 18000
+      },
+      "routing_rules": {
+        "short": [
+          1,
+          2
+        ],
+        "medium": [
+          2,
+          4
+        ],
+        "long": [
+          4
+        ],
+        "extra_long": [
+          4
+        ]
+      },
+      "load_balance_strategy": "least_connections",
+      "max_queue_length": 100,
+      "request_timeout": 600000,
+      "engine_timeout": 1200
+    },
+    "benchmark": {
+      "num_runs": 2,
+      "random_seed": 42,
+      "warmup_requests": 0,
+      "max_concurrent_requests": 15,
+      "request_rate_limit": null,
+      "generation": {
+        "max_new_tokens": 20000,
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0
+      }
+    },
+    "vllm_server": {
+      "base_port": 8000,
+      "host": "127.0.0.1",
+      "startup_timeout": 300,
+      "health_check_interval": 5,
+      "api_type": "openai",
+      "log_dir": "/research/d1/gds/ytyang/kwchen/hetero_rollout/results/debug_test/vllm_logs"
+    },
+    "metrics": {
+      "collect": [
+        "input_tokens",
+        "output_tokens",
+        "ttft",
+        "tpot",
+        "total_latency",
+        "gpu_memory_used",
+        "gpu_utilization",
+        "throughput"
+      ],
+      "gpu_monitor_interval": 0.5,
+      "save_intermediate": true
+    },
+    "results": {
+      "output_dir": "./results",
+      "timestamp_format": "%Y%m%d_%H%M%S",
+      "formats": [
+        "json",
+        "csv"
+      ],
+      "generate_plots": true,
+      "generate_report": true
+    },
+    "logging": {
+      "level": "INFO",
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+      "file": "./logs/aime25_benchmark.log",
+      "console": true
+    }
+  },
+  "num_sequences": 15,
+  "python_version": "3.10.19 (main, Oct 21 2025, 16:43:05) [GCC 11.2.0]",
+  "cuda_visible_devices": ""
+}

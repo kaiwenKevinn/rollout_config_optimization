@@ -75,7 +75,8 @@ class BenchmarkRunner:
         config: Dict[str, Any],
         dataset_loader: GPQADatasetLoader,
         sequence_profiler: SequenceProfiler,
-        output_dir: str = "./results"
+        output_dir: str = "./results",
+        profiling_dir: Optional[str] = None
     ):
         """
         Initialize the benchmark runner.
@@ -85,15 +86,26 @@ class BenchmarkRunner:
             dataset_loader: Loaded dataset
             sequence_profiler: Profiler with sequence information
             output_dir: Directory for results
+            profiling_dir: Directory containing profiling results with actual_total_tokens
         """
         self.config = config
         self.dataset_loader = dataset_loader
         self.sequence_profiler = sequence_profiler
         self.output_dir = Path(output_dir)
+        self.profiling_dir = profiling_dir
         
         # Get sequences sorted by length for profiling
         self.sequences = sequence_profiler.get_sequences_sorted_by_length()
         self.questions = {q.question_id: q for q in dataset_loader.get_questions()}
+        
+        # 如果提供了profiling目录，加载实际的total_tokens数据
+        if self.profiling_dir and Path(self.profiling_dir).exists():
+            logger.info(f"Loading actual total tokens from profiling directory: {self.profiling_dir}")
+            updated_count = self.sequence_profiler.load_actual_tokens_from_profiling(self.profiling_dir)
+            if updated_count > 0:
+                logger.info(f"Successfully loaded actual tokens for {updated_count} sequences")
+                # 重新获取序列列表以包含更新的数据
+                self.sequences = sequence_profiler.get_sequences_sorted_by_length()
         
         # Random seed for reproducibility
         self.random_seed = config.get("benchmark", {}).get("random_seed", 42)
@@ -297,7 +309,9 @@ class BenchmarkRunner:
                 question_id=seq.question_id,
                 prompt=question.prompt,
                 input_tokens=seq.input_tokens,
-                thresholds=self.config.get("scheduling", {}).get("length_thresholds")
+                profiling_dir=self.profiling_dir,
+                thresholds=self.config.get("scheduling", {}).get("length_thresholds"),
+                total_thresholds=self.config.get("scheduling", {}).get("total_length_thresholds")
             )
             
             # Route and execute
@@ -337,13 +351,21 @@ class BenchmarkRunner:
                 request_id = f"bench_{idx}_{seq.question_id}"
                 
                 # Create scheduler request
+                # 优先使用实际总token数进行分类（如果已完成推理）
+                actual_total_tokens = None
+                if seq.is_completed and seq.actual_total_tokens:
+                    actual_total_tokens = seq.actual_total_tokens
+                
                 request = create_scheduler_request(
                     request_id=request_id,
                     question_id=seq.question_id,
                     prompt=question.prompt,
                     input_tokens=seq.input_tokens,
+                    actual_total_tokens=actual_total_tokens,
+                    profiling_dir=self.profiling_dir,
                     thresholds=scenario.length_thresholds or 
-                               self.config.get("scheduling", {}).get("length_thresholds")
+                               self.config.get("scheduling", {}).get("length_thresholds"),
+                    total_thresholds=self.config.get("scheduling", {}).get("total_length_thresholds")
                 )
                 
                 # Route request
@@ -356,7 +378,11 @@ class BenchmarkRunner:
                 instance = pool.get_instance(routing_result.instance_id)
                 if not instance:
                     logger.warning(f"Instance {routing_result.instance_id} not found")
+                    logger.warning(f"Available instances: {[inst.instance_id for inst in pool.instances]}")
                     return
+                
+                # 调试日志：确认实例状态
+                logger.info(f"Executing request {request_id} on instance {instance.instance_id} (port {instance.port}, state: {instance.state.value})")
                 
                 # Execute request with metrics tracking
                 with metrics_collector.track_request(
@@ -365,7 +391,7 @@ class BenchmarkRunner:
                     instance_id=routing_result.instance_id,
                     tp_degree=routing_result.tp_degree,
                     input_tokens=seq.input_tokens,
-                    sequence_category=seq.category
+                    sequence_category=request.sequence_category
                 ) as tracker:
                     tracker.set_queue_time(routing_result.queue_time)
                     

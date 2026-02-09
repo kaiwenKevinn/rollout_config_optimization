@@ -64,7 +64,8 @@ async def run_homogeneous_benchmark(
     num_runs: int = 3,
     profiling_dir: str = None,
     save_vllm_logs: bool = True,
-    exclude_tp1: bool = False
+    exclude_tp1: bool = False,
+    exclude_tp2: bool = False
 ):
     """Run homogeneous benchmarks for specified TP degrees.
     
@@ -92,7 +93,8 @@ async def run_homogeneous_benchmark(
             adaptive_homogeneous, _ = create_adaptive_scenarios_from_profiling(
                 profiling_dir, 
                 config.get("gpu", {}).get("total_gpus", 8),
-                exclude_tp1=exclude_tp1
+                exclude_tp1=exclude_tp1,
+                exclude_tp2=exclude_tp2
             )
             adaptive_configs = adaptive_homogeneous
             
@@ -140,7 +142,8 @@ async def run_homogeneous_benchmark(
         config=config,
         dataset_loader=loader,
         sequence_profiler=profiler,
-        output_dir=str(output_path)
+        output_dir=str(output_path),
+        profiling_dir=profiling_dir  # 传递profiling目录给runner
     )
     
     # Run benchmarks for each TP degree
@@ -166,6 +169,15 @@ async def run_homogeneous_benchmark(
     for config_item in configs_to_run:
         tp = config_item["tp"]
         description = config_item.get("description", f"Manual TP={tp} configuration")
+        
+        # 检查是否需要排除TP=1或TP=2
+        if exclude_tp1 and tp == 1:
+            logger.info(f"Skipping TP={tp}: excluded by --exclude-tp1 flag")
+            continue
+        if exclude_tp2 and tp == 2:
+            logger.info(f"Skipping TP={tp}: excluded by --exclude-tp2 flag")
+            continue
+            
         if total_gpus % tp != 0:
             logger.warning(f"Skipping TP={tp}: cannot evenly divide {total_gpus} GPUs")
             continue
@@ -281,6 +293,12 @@ def main():
         default=False,
         help="Exclude TP=1 configurations when using adaptive mode"
     )
+    parser.add_argument(
+        "--exclude-tp2",
+        action="store_true",
+        default=False,
+        help="Exclude TP=2 configurations when using adaptive mode"
+    )
     
     args = parser.parse_args()
     
@@ -321,7 +339,8 @@ def main():
             num_runs=args.runs,
             profiling_dir=args.profiling_dir,
             save_vllm_logs=args.save_vllm_logs,
-            exclude_tp1=args.exclude_tp1
+            exclude_tp1=args.exclude_tp1,
+            exclude_tp2=args.exclude_tp2
         ))
         
         logger.info("\n" + "=" * 60)

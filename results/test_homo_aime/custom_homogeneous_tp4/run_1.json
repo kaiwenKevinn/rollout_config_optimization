@@ -1,0 +1,82 @@
+{
+  "run_id": 1,
+  "scenario_name": "custom_homogeneous_tp4",
+  "success": true,
+  "duration": 894.8756837844849,
+  "error_message": "",
+  "metrics": {
+    "scenario_name": "custom_homogeneous_tp4",
+    "run_id": 1,
+    "start_time": "2026-02-07T11:10:42.279267",
+    "end_time": "2026-02-07T11:23:19.671646",
+    "duration_seconds": 757.3923797607422,
+    "total_requests": 15,
+    "successful_requests": 15,
+    "failed_requests": 0,
+    "total_input_tokens": 1962,
+    "total_output_tokens": 147691,
+    "throughput_tokens_per_second": 194.99932128529616,
+    "requests_per_second": 0.019804793922984083,
+    "ttft_mean": 282.4477831522624,
+    "ttft_std": 55.372178815789994,
+    "ttft_p50": 268.47195625305176,
+    "ttft_p90": 352.25682258605957,
+    "ttft_p99": 366.99206829071045,
+    "tpot_mean": 37.98691108815505,
+    "tpot_std": 0.31810689589969277,
+    "tpot_p50": 37.86504379838017,
+    "tpot_p90": 38.45119135433637,
+    "tpot_p99": 38.742041378983544,
+    "latency_mean": 374159.33742523193,
+    "latency_std": 286256.3749167144,
+    "latency_p50": 180034.60025787354,
+    "latency_p90": 754927.9005527496,
+    "latency_p99": 757233.0157804489,
+    "gpu_memory_peak_gb": 74.20916748046875,
+    "gpu_utilization_mean": 82.64716135458167,
+    "per_instance_metrics": {
+      "custom_homo_tp4_0": {
+        "request_count": 8,
+        "tp_degree": 4,
+        "total_tokens": 73704,
+        "latency_mean": 350799.86277222633,
+        "latency_p50": 137314.41605091095,
+        "latency_p99": 757234.4712042809,
+        "throughput_mean": 26.32924233080977
+      },
+      "custom_homo_tp4_1": {
+        "request_count": 7,
+        "tp_degree": 4,
+        "total_tokens": 73987,
+        "latency_mean": 400855.8798858098,
+        "latency_p50": 437488.0385398865,
+        "latency_p99": 749530.2713108063,
+        "throughput_mean": 26.24570163416187
+      }
+    },
+    "scheduling_success_rate": 1.0,
+    "avg_queue_time": 0.0071343104044596355
+  },
+  "scheduler_stats": {
+    "total_requests": 15,
+    "successful_schedules": 15,
+    "failed_schedules": 0,
+    "success_rate": 1.0,
+    "avg_queue_time": 0.0071343104044596355,
+    "max_queue_time": 0.10370349884033203,
+    "by_category": {
+      "long": 2,
+      "extra_long": 6,
+      "medium": 4,
+      "short": 3
+    },
+    "by_tp_degree": {
+      "4": 15
+    },
+    "by_instance": {
+      "custom_homo_tp4_0": 8,
+      "custom_homo_tp4_1": 7
+    }
+  },
+  "request_count": 15
+}

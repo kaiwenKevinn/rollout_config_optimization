@@ -6,6 +6,8 @@ Defines the abstract base class for request schedulers and common data structure
 
 import time
 import logging
+import json
+from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
@@ -29,6 +31,7 @@ class SchedulerRequest:
     prompt: str
     input_tokens: int
     sequence_category: str
+    actual_total_tokens: Optional[int] = None
     created_at: float = field(default_factory=time.time)
     scheduled_at: Optional[float] = None
     target_instance_id: Optional[str] = None
@@ -154,6 +157,39 @@ class LoadBalancer:
         return instances[index]
 
 
+def _get_actual_total_tokens_from_profiling(profiling_dir: str, question_id: str) -> Optional[int]:
+    """
+    从profiling目录中获取指定问题的实际总token数
+    
+    Args:
+        profiling_dir: profiling结果目录路径
+        question_id: 问题ID
+        
+    Returns:
+        实际总token数，如果找不到则返回None
+    """
+    try:
+        inference_results_file = Path(profiling_dir) / "inference_results.json"
+        if not inference_results_file.exists():
+            logger.warning(f"Profiling file not found: {inference_results_file}")
+            return None
+        
+        with open(inference_results_file, 'r', encoding='utf-8') as f:
+            inference_results = json.load(f)
+        
+        # 查找对应question_id的记录
+        for result in inference_results:
+            if result.get("question_id") == question_id:
+                return result.get("actual_total_tokens")
+        
+        logger.warning(f"Question {question_id} not found in profiling results")
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error loading actual_total_tokens from profiling: {e}")
+        return None
+
+
 def categorize_sequence(input_tokens: int, thresholds: Optional[Dict[str, int]] = None) -> str:
     if thresholds is None:
         thresholds = {"short": 256, "medium": 512, "long": 1024}
@@ -169,9 +205,98 @@ def categorize_sequence(input_tokens: int, thresholds: Optional[Dict[str, int]] 
 
 def create_scheduler_request(request_id: str, question_id: str, prompt: str,
                             input_tokens: int, thresholds: Optional[Dict[str, int]] = None,
+                            actual_total_tokens: Optional[int] = None,
+                            profiling_dir: Optional[str] = None,
+                            total_thresholds: Optional[Dict[str, int]] = None,
                             **kwargs) -> SchedulerRequest:
-    category = categorize_sequence(input_tokens, thresholds)
-    return SchedulerRequest(
-        request_id=request_id, question_id=question_id, prompt=prompt,
-        input_tokens=input_tokens, sequence_category=category, **kwargs
+    """
+    创建调度请求，支持基于实际token数的智能分类。
+    
+    分类优先级：
+    1. 首选：使用profiling数据中的actual_total_tokens + 总token阈值
+    2. 备选：使用输入token数 + 输入token阈值
+    3. 默认：使用基础阈值配置
+    
+    Args:
+        request_id: 请求唯一标识
+        question_id: 问题ID，用于关联profiling数据
+        prompt: 请求提示文本
+        input_tokens: 输入token数量
+        thresholds: 输入token分类阈值
+        actual_total_tokens: 实际总token数（输入+输出）
+        profiling_dir: profiling结果目录路径
+        total_thresholds: 总token分类阈值
+        **kwargs: 其他参数
+    
+    Returns:
+        SchedulerRequest对象
+    """
+    # 优先从profiling目录获取实际总token数
+    if profiling_dir and question_id:
+        actual_total_tokens = _get_actual_total_tokens_from_profiling(profiling_dir, question_id)
+        if actual_total_tokens is not None:
+            logger.debug(f"Loaded actual_total_tokens={actual_total_tokens} for {question_id} from profiling")
+        else:
+            logger.debug(f"Failed to load actual_total_tokens for {question_id} from profiling")
+    
+    # 初始化分类变量
+    category = None
+    classification_method = "default"
+    
+    # 方法1：使用实际总token数进行分类（最高优先级）
+    if actual_total_tokens is not None and actual_total_tokens > 0:
+        # 使用配置的总token阈值或默认值
+        effective_total_thresholds = total_thresholds or {
+            'short': 6000,      # <= 6000 tokens
+            'medium': 12000,    # <= 12000 tokens
+            'long': 18000,      # <= 18000 tokens
+            'extra_long': float('inf')  # > 18000 tokens
+        }
+        category = categorize_sequence(actual_total_tokens, effective_total_thresholds)
+        classification_method = "actual_total_tokens"
+        logger.debug(f"Using actual total tokens {actual_total_tokens} for {question_id}, categorized as {category}")
+    
+    # 方法2：使用输入token数进行分类（次优选择）
+    elif input_tokens > 0:
+        # 使用配置的输入token阈值
+        effective_input_thresholds = thresholds or {
+            'short': 256,
+            'medium': 512, 
+            'long': 1024
+        }
+        category = categorize_sequence(input_tokens, effective_input_thresholds)
+        classification_method = "input_tokens"
+        logger.debug(f"Using input tokens {input_tokens} for {question_id}, categorized as {category}")
+    
+    # 方法3：默认分类
+    else:
+        category = "medium"  # 默认中等长度
+        classification_method = "default"
+        logger.debug(f"Using default classification for {question_id}: {category}")
+    
+    # 创建调度请求
+    request = SchedulerRequest(
+        request_id=request_id, 
+        question_id=question_id, 
+        prompt=prompt,
+        input_tokens=input_tokens, 
+        sequence_category=category, 
+        actual_total_tokens=actual_total_tokens, 
+        **kwargs
     )
+    
+    # 记录详细的分类信息到日志
+    classification_info = {
+        "request_id": request_id,
+        "question_id": question_id,
+        "input_tokens": input_tokens,
+        "actual_total_tokens": actual_total_tokens,
+        "sequence_category": category,
+        "classification_method": classification_method,
+        "has_profiling_data": profiling_dir is not None
+    }
+    logger.info(f"Sequence Classification Result: {classification_info}")
+    
+    return request
+    
+    return request

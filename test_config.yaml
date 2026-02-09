@@ -1,0 +1,18 @@
+benchmark:
+  max_concurrent_requests: 4
+  warmup_requests: 2
+gpu:
+  total_gpus: 8
+model:
+  name: Qwen/Qwen3-32B
+  trust_remote_code: true
+scheduling:
+  length_thresholds:
+    long: 15000
+    medium: 10000
+    short: 5000
+  total_length_thresholds:
+    extra_long: .inf
+    long: 18000
+    medium: 12000
+    short: 6000

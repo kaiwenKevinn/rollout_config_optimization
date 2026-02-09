@@ -1,0 +1,62 @@
+{
+  "scenario_name": "config_based_heterogeneous",
+  "run_id": 2,
+  "start_time": "2026-02-09T09:27:05.981813",
+  "end_time": "2026-02-09T11:18:04.493101",
+  "duration_seconds": 6658.511288404465,
+  "total_requests": 198,
+  "successful_requests": 198,
+  "failed_requests": 0,
+  "total_input_tokens": 51183,
+  "total_output_tokens": 6447676,
+  "throughput_tokens_per_second": 968.3359719203861,
+  "requests_per_second": 0.029736376710032646,
+  "ttft_mean": 2178.585218660759,
+  "ttft_std": 416.3429156397112,
+  "ttft_p50": 2269.8129415512085,
+  "ttft_p90": 2709.781050682068,
+  "ttft_p99": 2810.5615186691284,
+  "tpot_mean": 92.78571932893503,
+  "tpot_std": 42.81970461628306,
+  "tpot_p50": 86.65279789076331,
+  "tpot_p90": 137.5455313056398,
+  "tpot_p99": 165.6871903589766,
+  "latency_mean": 3247325.647136178,
+  "latency_std": 1913206.9177097632,
+  "latency_p50": 3403626.172542572,
+  "latency_p90": 5487407.260942459,
+  "latency_p99": 6574022.191405296,
+  "gpu_memory_peak_gb": 76.6759033203125,
+  "gpu_utilization_mean": 84.91181752873563,
+  "per_instance_metrics": {
+    "hetero_tp2_0": {
+      "request_count": 49,
+      "tp_degree": 2,
+      "total_tokens": 1573953,
+      "latency_mean": 3423480.318862565,
+      "latency_p50": 3492400.3365039825,
+      "latency_p99": 6642965.642127991,
+      "throughput_mean": 11.811870884113652
+    },
+    "hetero_tp4_0": {
+      "request_count": 100,
+      "tp_degree": 4,
+      "total_tokens": 3335132,
+      "latency_mean": 3189128.043768406,
+      "latency_p50": 3438560.201406479,
+      "latency_p99": 5543934.342172146,
+      "throughput_mean": 12.46319247554279
+    },
+    "hetero_tp2_1": {
+      "request_count": 49,
+      "tp_degree": 2,
+      "total_tokens": 1538591,
+      "latency_mean": 3189941.594527692,
+      "latency_p50": 3274751.8498897552,
+      "latency_p99": 6485029.031543732,
+      "throughput_mean": 13.206839705374263
+    }
+  },
+  "scheduling_success_rate": 1.0,
+  "avg_queue_time": 0.00018226859545466875
+}

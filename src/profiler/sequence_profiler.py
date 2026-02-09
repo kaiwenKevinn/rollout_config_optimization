@@ -146,9 +146,9 @@ class SequenceProfiler:
     # Default thresholds for total sequence length categorization (post-inference)
     # These are typically larger since they include output tokens
     DEFAULT_TOTAL_THRESHOLDS = {
-        'short': 512,      # Total tokens <= 512
-        'medium': 1024,    # Total tokens <= 1024  
-        'long': 2048       # Total tokens <= 2048, > 2048 is extra_long
+        'short': 1000,      # Total tokens <= 1000 (更适合AIME数据集)
+        'medium': 3000,     # Total tokens <= 3000
+        'long': 8000        # Total tokens <= 8000
     }
     
     # Estimated output tokens based on question complexity
@@ -611,6 +611,61 @@ class SequenceProfiler:
     def get_completed_sequences(self) -> List[SequenceInfo]:
         """Get all sequences that have completed inference."""
         return [s for s in self._sequences if s.is_completed]
+    
+    def load_actual_tokens_from_profiling(self, profiling_dir: str) -> int:
+        """
+        从profiling目录加载实际的total_tokens数据
+        
+        Args:
+            profiling_dir: profiling结果目录路径
+            
+        Returns:
+            成功更新的序列数量
+        """
+        try:
+            profiling_path = Path(profiling_dir)
+            inference_results_file = profiling_path / "inference_results.json"
+            
+            if not inference_results_file.exists():
+                logger.warning(f"Profiling file not found: {inference_results_file}")
+                return 0
+            
+            with open(inference_results_file, 'r', encoding='utf-8') as f:
+                results = json.load(f)
+            
+            updated_count = 0
+            for result in results:
+                question_id = result.get("question_id")
+                actual_total_tokens = result.get("actual_total_tokens")
+                actual_output_tokens = result.get("actual_output_tokens")
+                generation_time_ms = result.get("generation_time_ms")
+                
+                if question_id and actual_total_tokens and actual_output_tokens:
+                    seq_info = self.get_sequence_by_id(question_id)
+                    if seq_info:
+                        seq_info.update_with_actual_output(
+                            actual_output_tokens=actual_output_tokens,
+                            generation_time_ms=generation_time_ms,
+                            categorizer=self
+                        )
+                        updated_count += 1
+                        
+                        logger.debug(
+                            f"Loaded actual tokens for {question_id}: "
+                            f"input={seq_info.input_tokens}, output={actual_output_tokens}, "
+                            f"total={seq_info.actual_total_tokens}, category={seq_info.actual_category}"
+                        )
+            
+            # 重新计算分布
+            if updated_count > 0:
+                self._distribution = self._calculate_distribution()
+            
+            logger.info(f"Loaded actual tokens from profiling for {updated_count} sequences")
+            return updated_count
+            
+        except Exception as e:
+            logger.error(f"Error loading actual tokens from profiling: {e}")
+            return 0
     
     def get_sequences_by_actual_category(self) -> Dict[str, List[SequenceInfo]]:
         """
