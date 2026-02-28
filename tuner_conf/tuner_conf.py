@@ -9,7 +9,7 @@ import torch
 import math
 import gc
 
-DEFAULT_SEQUENCE_LENGTH = 4096
+DEFAULT_SEQUENCE_LENGTH = 32768
 
 
 def get_other_model_size(model_path):

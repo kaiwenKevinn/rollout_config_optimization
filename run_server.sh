@@ -1,3 +1,6 @@
+#!/bin/bash
+# conda activate /research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env
+export no_proxy=localhost,127.0.0.1,192.168.50.186
 model_path=$1
 port=$2
 tp_size=$3
@@ -36,10 +39,12 @@ echo enable_chunked_prefill ${enable_chunked_prefill}
 echo enable_prefix_caching ${enable_prefix_caching}
 echo disable_custom_all_reduce ${disable_custom_all_reduce}
 echo use_v2_block_manager ${use_v2_block_manager}
-echo  python -m vllm.entrypoints.api_server \
+ # --max-num-batched-tokens 32768 \
+
+echo  python -m clients.api_server \
     --model ${model_path} \
     --disable-log-requests \
-    --max-num-batched-tokens ${max_num_batched_tokens} \
+    --max-num-batched-tokens 32768\
     --max-num-seqs ${max_num_seqs} \
     --scheduler-delay-factor ${scheduler_delay_factor} \
     --port ${int_port} \
@@ -48,13 +53,16 @@ echo  python -m vllm.entrypoints.api_server \
     --block-size ${block_size} \
     --gpu-memory-utilization 0.9\
     --trust-remote-code\
+    --enforce-eager\
+    --disable-async-output-proc\
+    --rope-scaling '{"rope_type": "linear", "factor": 1.0}'\
     $additional_options
 #     
 
-python -m vllm.entrypoints.api_server \
+python -m clients.api_server \
     --model ${model_path} \
     --disable-log-requests \
-    --max-num-batched-tokens ${max_num_batched_tokens} \
+    --max-num-batched-tokens 32768 \
     --max-num-seqs ${max_num_seqs} \
     --scheduler-delay-factor ${scheduler_delay_factor} \
     --port ${int_port} \
@@ -63,4 +71,7 @@ python -m vllm.entrypoints.api_server \
     --block-size ${block_size} \
     --gpu-memory-utilization 0.9\
     --trust-remote-code\
+    --enforce-eager\
+    --disable-async-output-proc\
+    --rope-scaling '{"rope_type": "linear", "factor": 1.0}'\
     $additional_options

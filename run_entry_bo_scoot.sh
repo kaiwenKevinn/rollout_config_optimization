@@ -8,8 +8,14 @@ gpu_num=$7
 gpu_type=$8
 
 # install requirements
-pip install -r requirements.txt
-
+# pip install -r requirements.txt
+export VLLM_TORCH_COMPILE_LEVEL=NONE
+export TORCHINDUCTOR_DISABLE=1
+export TORCH_DYNAMO_DISABLE=1
+export VLLM_ENABLE_V1_MULTIPROCESSING=0
+export VLLM_GRAPH_RESERVED_MEM=0.1
+export VLLM_GRAPH_COMPILATION=0
+export no_proxy=localhost,127.0.0.1,192.168.50.186
 # obtain the default tp, and update max_sequence_length
 cd tuner_conf
 bash tuner_conf.sh ${model_path}
@@ -36,4 +42,5 @@ python bo_scoot.py --model_path ${model_path}\
                     --bo_loop 30\
                     --exp_num 1\
                     --num_requests ${request_num}\
-                    --num_obj 3\
+                    --num_obj 1\
+                    --sequence_profile_path /research/d1/gds/ytyang/kwchen/hetero_rollout/results/gpqa_test/sequence_profile.json\

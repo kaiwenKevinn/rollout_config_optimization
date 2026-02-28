@@ -8,14 +8,14 @@ from typing import Any, AsyncGenerator, Optional
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
+import uvicorn
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine
-from vllm.entrypoints.launcher import serve_http
+from vllm.entrypoints.utils import with_cancellation
 from vllm.logger import init_logger
 from vllm.sampling_params import SamplingParams
 from vllm.usage.usage_lib import UsageContext
-from vllm.utils import (FlexibleArgumentParser, iterate_with_cancellation,
-                        random_uuid)
+from vllm.utils import FlexibleArgumentParser, random_uuid
 from vllm.version import __version__ as VLLM_VERSION
 
 logger = init_logger("vllm.entrypoints.api_server")
@@ -30,23 +30,45 @@ async def health() -> Response:
     """Health check."""
     return Response(status_code=200)
 
+def _get_metric(metrics_obj, name: str, labels: dict) -> float:
+    """Safely get metric value; return 0.0 if metric not present (vLLM version differences)."""
+    try:
+        gauge = getattr(metrics_obj, name, None)
+        if gauge is None:
+            return 0.0
+        return gauge.labels(**labels)._value.get()
+    except Exception:
+        return 0.0
+
+
 @app.get("/metrics")
 async def metrics() -> Response:
     """Get metrics"""
-    import traceback
     try:
-        metrics = {
-            'gpu_cache_usage': engine.engine.stat_loggers['prometheus'].metrics.gauge_gpu_cache_usage.labels(
-                **engine.engine.stat_loggers['prometheus'].labels)._value.get(),
-            'pending_queue_length': engine.engine.stat_loggers['prometheus'].metrics.gauge_scheduler_waiting.labels(
-                **engine.engine.stat_loggers['prometheus'].labels)._value.get(),
-	        'gpu_hit_rate': engine.engine.stat_loggers['prometheus'].metrics.gauge_gpu_prefix_cache_hit_rate.labels(
-                **engine.engine.stat_loggers['prometheus'].labels)._value.get(),
+        sl = engine.engine.stat_loggers.get('prometheus')
+        if sl is None:
+            return JSONResponse({
+                'gpu_cache_usage': 0.0,
+                'pending_queue_length': 0,
+                'num_running': 0,
+                'gpu_hit_rate': 0.0,
+            })
+        m = sl.metrics
+        lbl = sl.labels
+        result = {
+            'gpu_cache_usage': _get_metric(m, 'gauge_gpu_cache_usage', lbl),
+            'pending_queue_length': int(_get_metric(m, 'gauge_scheduler_waiting', lbl)),
+            'num_running': int(_get_metric(m, 'gauge_scheduler_running', lbl)),
+            'gpu_hit_rate': _get_metric(m, 'gauge_gpu_prefix_cache_hit_rate', lbl),
         }
-        return JSONResponse(metrics)
-    except Exception as e:
-        print(f'init error: {traceback.format_exc()}')
-        return Response(status_code=599)
+        return JSONResponse(result)
+    except Exception:
+        return JSONResponse({
+            'gpu_cache_usage': 0.0,
+            'pending_queue_length': 0,
+            'num_running': 0,
+            'gpu_hit_rate': 0.0,
+        })
 
 @app.post("/generate")
 async def generate(request: Request) -> Response:
@@ -58,15 +80,21 @@ async def generate(request: Request) -> Response:
     - other fields: the sampling parameters (See `SamplingParams` for details).
     """
     request_dict = await request.json()
+    return await _generate(request_dict, raw_request=request)
+
+
+@with_cancellation
+async def _generate(request_dict: dict, raw_request: Request) -> Response:
     prompt = request_dict.pop("prompt")
     stream = request_dict.pop("stream", False)
+    # vLLM requires max_tokens >= 1
+    if request_dict.get("max_tokens", 1) < 1:
+        request_dict["max_tokens"] = 1
     sampling_params = SamplingParams(**request_dict)
     request_id = random_uuid()
 
     assert engine is not None
     results_generator = engine.generate(prompt, sampling_params, request_id)
-    results_generator = iterate_with_cancellation(
-        results_generator, is_cancelled=request.is_disconnected)
 
     # Streaming case
     async def stream_results() -> AsyncGenerator[bytes, None]:
@@ -130,9 +158,10 @@ async def run_server(args: Namespace,
     app = await init_app(args, llm_engine)
     assert engine is not None
 
-    shutdown_task = await serve_http(
+    # Use uvicorn directly to avoid vLLM serve_http's engine_client requirement
+    # (incompatible with our in-process AsyncLLMEngine setup)
+    config = uvicorn.Config(
         app,
-        engine=engine,
         host=args.host,
         port=args.port,
         log_level=args.log_level,
@@ -143,8 +172,9 @@ async def run_server(args: Namespace,
         ssl_cert_reqs=args.ssl_cert_reqs,
         **uvicorn_kwargs,
     )
-
-    await shutdown_task
+    config.load()
+    server = uvicorn.Server(config)
+    await server.serve()
 
 
 if __name__ == "__main__":

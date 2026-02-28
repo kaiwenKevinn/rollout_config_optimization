@@ -18,9 +18,14 @@ enable_chunked_prefill=${16}
 enable_prefix_caching=${17}
 disable_custom_all_reduce=${18}
 use_v2_block_manager=${19}
+sequence_profile_path=${20:-}
 
+additional_options=""
 if [ "${pressure_test}" == "True" ]; then
     additional_options="--pressure-test --max-concurrent-requests ${max_concurrent_requests}"
+fi
+if [ -n "${sequence_profile_path}" ]; then
+    additional_options="${additional_options} --sequence-profile-path ${sequence_profile_path}"
 fi
 
 echo run_client.sh

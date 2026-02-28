@@ -1,4 +1,4 @@
-vllm==0.5.5
+vllm==0.9.0
 transformers_stream_generator
 
 # hebo independents
@@ -12,3 +12,4 @@ catboost>=0.24.4
 xgboost
 lightgbm
 disjoint-set
+matplotlib

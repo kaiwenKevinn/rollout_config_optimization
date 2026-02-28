@@ -55,8 +55,27 @@ def read_historical_data(res_dir_path):
                        "disable_custom_all_reduce": [True if res["disable_custom_all_reduce"] == 'True' else False][0],
                        "use_v2_block_manager": [True if res["use_v2_block_manager"] == 'True' else False][0]}
                     )
-            yy.append([-1 * res["request_throughput"],
-                       res["mean_ttft_ms"],
-                       res["mean_tpot_ms"]
-                       ])
+            # 多目标优化
+            # yy.append([-1 * res["request_throughput"],
+            #            res["mean_ttft_ms"],
+            #            res["mean_tpot_ms"]
+            #            ])
+
+            # 将多目标合并为单目标：加权求和（与bo_scoot.py中的obj函数保持一致）
+            # 权重分配：吞吐量(0.5), TTFT(0.3), TPOT(0.2)
+            throughput_weight = 1.0
+            ttft_weight = 0.0
+            tpot_weight = 0.0
+            
+            # 标准化各目标值到相近范围
+            normalized_throughput = -1 * res["request_throughput"] / 100.0
+            normalized_ttft = res["mean_ttft_ms"] / 1000.0
+            normalized_tpot = res["mean_tpot_ms"] / 100.0
+            
+            # 计算综合目标值
+            combined_objective = (throughput_weight * normalized_throughput + 
+                                ttft_weight * normalized_ttft + 
+                                tpot_weight * normalized_tpot)
+            
+            yy.append([combined_objective])
     return xx, yy

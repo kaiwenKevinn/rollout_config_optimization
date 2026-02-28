@@ -22,6 +22,7 @@ dataset_name=${17}
 enable_prefix_caching=${18}
 disable_custom_all_reduce=${19}
 use_v2_block_manager=${20}
+sequence_profile_path=${21:-}
 OLD_IFS="$IFS"
 IFS=','
 read -ra ADDR <<< "$port"
@@ -53,6 +54,7 @@ echo dataset_name=${17} ${dataset_name}
 echo enable_prefix_caching=${18} ${enable_prefix_caching}
 echo disable_custom_all_reduce=${19} ${disable_custom_all_reduce}
 echo use_v2_block_manager=${20} ${use_v2_block_manager}
+echo sequence_profile_path=${21} ${sequence_profile_path}
 
 echo "server start!"
 for ((i=0; i<${#ADDR[@]}; i++)); do
@@ -64,13 +66,26 @@ done
 echo "finish server start!"
 
 echo "client start!"
-bash run_client.sh ${model_path} ${dataset_path} ${request_rate} ${num_requests} ${pressure_test} ${max_concurrent_requests} ${tp_size} ${pp_size} ${max_num_seqs} ${max_num_batched_tokens} ${scheduler_delay_factor} ${block_size} ${port} ${model} ${dataset_name} ${enable_chunked_prefill} ${enable_prefix_caching} ${disable_custom_all_reduce} ${use_v2_block_manager}
+bash run_client.sh ${model_path} ${dataset_path} ${request_rate} ${num_requests} ${pressure_test} ${max_concurrent_requests} ${tp_size} ${pp_size} ${max_num_seqs} ${max_num_batched_tokens} ${scheduler_delay_factor} ${block_size} ${port} ${model} ${dataset_name} ${enable_chunked_prefill} ${enable_prefix_caching} ${disable_custom_all_reduce} ${use_v2_block_manager} ${sequence_profile_path}
 echo "finish client start!"
 
 # Kill the whole process and then kill each port to ensure that the engine process has been fully killed
-pgrep -f "vllm.entrypoints.api_server" | xargs kill -9
-for i in "${ADDR[@]}"; do
-    int_port=$((i-0))
-    echo int_point=${int_port}
-    lsof -t -i:${int_port} | xargs kill -9
+echo "Killing vLLM API server processes..."
+for pid in $(pgrep -f "clients.api_server" 2>/dev/null); do
+    echo "Killing vLLM pid: $pid"
+    sudo kill -9 $pid 2>/dev/null || kill -9 $pid 2>/dev/null
 done
+
+# 2. 按端口杀进程（ADDR 需包含正确端口，如 8000 8001）
+ADDR=(8000 8001 8002 8003 8004 8005 8006 8007)  # 根据实际端口修改
+for port in "${ADDR[@]}"; do
+    if [ "$port" -gt 0 ] 2>/dev/null; then
+        pids=$(lsof -t -i:${port} 2>/dev/null)
+        if [ -n "$pids" ]; then
+            echo "Killing processes on port $port: $pids"
+            echo "$pids" | xargs sudo kill -9 2>/dev/null
+        fi
+    fi
+done
+
+echo "Done."

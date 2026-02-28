@@ -61,6 +61,12 @@ def add_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         type=str,
         default="sharegpt"
     )
+    parser.add_argument(
+        "--sequence_profile_path",
+        type=str,
+        default=None,
+        help="Path to sequence_profile.json with actual_output_tokens for realistic load."
+    )
 
     parser.add_argument(
         "--num_obj",
@@ -80,14 +86,16 @@ def run_benchmark_pipeline(combination: Tuple, gpu_nums, args):
     grouped_gpus = [','.join(gpus[i:i + tp_size]) for i in range(0, gpu_nums, tp_size)]
     grouped_gpus_string = '#'.join(grouped_gpus)
     raw_file_path = os.path.join(RAW_DIR, f'benchmark_tp_{combination[0]}_mns_{combination[1]}_mnbt_{combination[2]}_bs_{combination[3]}.txt')
+    seq_profile = args.sequence_profile_path or ""
     for i in range(3):
         # retry 3 times in case of failure
         try:
             logging.info(
-                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {1} {combination[1]} {combination[2]} {combination[5]} {combination[3]} {ports} {grouped_gpus_string} {args.model} {combination[4]} {args.dataset_name} {combination[6]} {combination[7]} {combination[8]} "
+                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {1} {combination[1]} {combination[2]} {combination[5]} {combination[3]} {ports} {grouped_gpus_string} {args.model} {combination[4]} {args.dataset_name} {combination[6]} {combination[7]} {combination[8]} {seq_profile} "
                 f"2>&1 | tee {raw_file_path}")
+            seq_profile = args.sequence_profile_path or ""
             os.system(
-                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {1} {combination[1]} {combination[2]} {combination[5]} {combination[3]} {ports} {grouped_gpus_string} {args.model} {combination[4]} {args.dataset_name} {combination[6]} {combination[7]} {combination[8]} "
+                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {1} {combination[1]} {combination[2]} {combination[5]} {combination[3]} {ports} {grouped_gpus_string} {args.model} {combination[4]} {args.dataset_name} {combination[6]} {combination[7]} {combination[8]} {seq_profile} "
                 f"2>&1 | tee {raw_file_path}")
             break
         except Exception:
@@ -109,7 +117,7 @@ def obj(rec: pd.DataFrame, gpu_nums, res_dir_path, args, min_world_size: int = 1
 
     # clear processes and ports sequentially
     try:
-        os.system(f'pgrep -f "vllm.entrypoints.api_server" | xargs kill -9')
+        os.system(f'pgrep -f "clients.api_server" | xargs kill -9')
     except Exception as e:
         print("Kill Whole Process Error:", e)
     # check the ports in the last round is cleared. If not, close them
@@ -129,13 +137,18 @@ def obj(rec: pd.DataFrame, gpu_nums, res_dir_path, args, min_world_size: int = 1
     time.sleep(5)  
     run_benchmark_pipeline(combination, gpu_nums, args)
 
-    # We utilize the hack way: get the latest file as the result in thie bo loop.
+    # 取最新的 vllm 结果文件（benchmark 失败时可能无新文件或取到旧配置）
+    vllm_files = []
     for root, _, files in os.walk(res_dir_path):
-        assert len(files) >= 1
-        file_path = os.path.join(root, files[len(files) - 1])
-        assert file_path.split('/')[-1].startswith("vllm"), f"in the {res_dir_path} only resutls files exist"
-        with open(file_path, 'r') as f:
-            act_result = json.load(f)
+        for name in files:
+            if name.startswith("vllm"):
+                vllm_files.append(os.path.join(root, name))
+    if not vllm_files:
+        logging.warning(f"No vllm result file in {res_dir_path}, benchmark may have failed")
+        return None
+    file_path = max(vllm_files, key=os.path.getmtime)
+    with open(file_path, 'r') as f:
+        act_result = json.load(f)
 
     # check wether the result from the latest file ("act_result") is indeed the output of actual env from the "rec"
     if combination == (int(act_result['tp']),
@@ -147,13 +160,31 @@ def obj(rec: pd.DataFrame, gpu_nums, res_dir_path, args, min_world_size: int = 1
                        str(act_result['enable_prefix_caching']),
                        str(act_result['disable_custom_all_reduce']),
                        str(act_result['use_v2_block_manager'])):
-        return np.array(
-            [[
-                -1 * act_result["request_throughput"],
-                act_result["mean_ttft_ms"],
-                act_result["mean_tpot_ms"]
-            ]]
-        )
+        # return np.array(
+        #     [[
+        #         -1 * act_result["request_throughput"],
+        #         act_result["mean_ttft_ms"],
+        #         act_result["mean_tpot_ms"]
+        #     ]]
+        # )
+
+        # 将多目标合并为单目标：加权求和
+        # 权重分配：吞吐量(0.5), TTFT(0.3), TPOT(0.2)
+        throughput_weight = 1
+        ttft_weight = 0
+        tpot_weight = 0
+        
+        # 标准化各目标值到相近范围
+        normalized_throughput = -1 * act_result["request_throughput"] / 100.0  # 假设吞吐量通常在几十到几百
+        normalized_ttft = act_result["mean_ttft_ms"] / 1000.0  # 转换为秒
+        normalized_tpot = act_result["mean_tpot_ms"] / 100.0   # 假设通常在几十毫秒
+        
+        # 计算综合目标值
+        combined_objective = (throughput_weight * normalized_throughput + 
+                            ttft_weight * normalized_ttft + 
+                            tpot_weight * normalized_tpot)
+        
+        return np.array([[combined_objective]])
     else:
         return None
 
@@ -243,10 +274,10 @@ def main(args):
                      f"Max World Size: {gpu_nums}"
                     )
         para_dict = [
-                    {"name": "tp", "type": "int_exponent", "lb": min_world_size, "ub": gpu_nums, "base": 2},
+                    {"name": "tp", "type": "int_exponent", "lb": max(min_world_size, 2), "ub": gpu_nums, "base": 2},
                      {"name": "max_num_seqs", "type": "int_exponent", "lb": 64, "ub": 8192, "base": 2},     # 8192 for 8卡单实例调优, 2048 for 4卡单实例调优 或 多实例调优
                      {"name": "max_num_batched_tokens", "type": "pow_int",  # "ub": int(2 ** (8 + gpu_nums))
-                      "lb": 64, 'ub': max(8192, max_sequence_length * 2), "base": 2},
+                      "lb": 64, 'ub': max(32768, max_sequence_length * 2), "base": 2},
                      {"name": "block_size", "type": "int_exponent", "lb": 8, "ub": 32, "base": 2},
                      {"name": "enable_chunked_prefill", "type": "bool"},
                      {"name": "scheduler_delay_factor", 'type': "step_int", "lb": 0, "ub": 20, "step": 2},
@@ -333,7 +364,11 @@ def main(args):
             rec_time = e_time - s_time
 
             s_time = time.time()
-            y = obj(rec, gpu_nums, res_dir_path, args, min_world_size=min_world_size)
+            try:
+                y = obj(rec, gpu_nums, res_dir_path, args, min_world_size=min_world_size)
+            except Exception as e:
+                logging.error(f'Config evaluation failed, continuing to next: {traceback.format_exc()}')
+                y = None
             e_time = time.time()
             run_time = e_time - s_time
 

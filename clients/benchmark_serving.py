@@ -17,7 +17,7 @@ from clients.backend_request_func import (ASYNC_REQUEST_FUNCS, RequestFuncInput,
 from tqdm.asyncio import tqdm
 from transformers import PreTrainedTokenizerBase, AutoTokenizer
 
-
+os.environ["no_proxy"] = "localhost,127.0.0.1,192.168.50.186"
 @dataclass
 class BenchmarkMetrics:
     completed: int
@@ -154,13 +154,29 @@ def sample_sonnet_requests(
 def sample_default_requests(
         dataset_path: str,
         num_requests: int,
-        tokenizer: PreTrainedTokenizerBase):
+        tokenizer: PreTrainedTokenizerBase,
+        sequence_profile_path: Optional[str] = None):
     # Load the dataset.
     with open(dataset_path) as f:
-        items = json.load(f)
+        data = json.load(f)
+        # Extract questions from the dataset structure
+        items = data.get('questions', data)  # Use 'questions' field if exists, otherwise use whole data
 
+    # Load sequence profile for actual_output_tokens when provided
+    actual_output_map = {}
+    if sequence_profile_path is not None and os.path.exists(sequence_profile_path):
+        with open(sequence_profile_path) as f:
+            profile = json.load(f)
+        for seq in profile.get('sequences', []):
+            qid = seq.get('question_id')
+            act_out = seq.get('actual_output_tokens')
+            if qid is not None and act_out is not None:
+                actual_output_map[qid] = int(act_out)
+        print(f"Loaded {len(actual_output_map)} actual_output_tokens from sequence_profile: {sequence_profile_path}")
+    
     if num_requests > len(items):
-        raise ValueError(f"num_requests must be less than the dataset volume {len(items)}")
+        print(f"Warning: num_requests ({num_requests}) is greater than dataset size ({len(items)}). Using all available samples.")
+        num_requests = len(items)
 
     items = items[:num_requests]
     random.shuffle(items)
@@ -169,14 +185,42 @@ def sample_default_requests(
         try:
             if 'input_len' not in items[i]:
                 items[i]['input_len'] = len(tokenizer(items[i]['prompt']).input_ids)
+            
+            # 优先从 sequence_profile 的 actual_output_tokens 获取（更接近真实负载）
+            if actual_output_map and 'question_id' in items[i]:
+                qid = items[i]['question_id']
+                if qid in actual_output_map:
+                    items[i]['output_len'] = actual_output_map[qid]
+                    sampled_prompts.append((items[i]['prompt'], items[i]['input_len'],
+                                           items[i]['output_len']))
+                    continue
+
+            # 回退：使用数据集中的 output_len 或从响应内容计算
             if 'output_len' not in items[i]:
-                items[i]['output_len'] = len(tokenizer(items[i]['response']).input_ids)
+                response_text = None
+                if 'response' in items[i]:
+                    response_text = items[i]['response']
+                elif 'answer' in items[i]:
+                    response_text = items[i]['answer']
+                elif 'output' in items[i]:
+                    response_text = items[i]['output']
+                elif 'correct_answer' in items[i]:
+                    response_text = items[i]['correct_answer']
+
+                if response_text is not None:
+                    items[i]['output_len'] = len(tokenizer(response_text).input_ids)
+                else:
+                    items[i]['output_len'] = 128  # 默认输出长度
+                    print(f"Warning: No response field found for item {i}, using default output_len=128")
+
             sampled_prompts.append((items[i]['prompt'], items[i]['input_len'],
                                     items[i]['output_len']))
-        except Exception:
+        except Exception as e:
             raise ValueError(f"Item key error! {items[0].keys()}, "
-                             f"each request item mush have 'prompt' "
-                             f"and have at least one of 'response' and 'output_len'.")
+                             f"each request item must have 'prompt' "
+                             f"and have at least one of 'response', 'answer', 'output', 'output_len', "
+                             f"or (question_id + sequence_profile with actual_output_tokens). "
+                             f"Original error: {str(e)}")
     return sampled_prompts
 
 
@@ -488,19 +532,30 @@ def main(args: argparse.Namespace):
     api_url = ','.join(api_url_list)
 
     def check_port(port):
-
         import socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex((f'{args.host}', port))
         sock.close()
         return result == 0
 
-    # wait for the model server is connected
-    for i in range(1000):
+    # Wait for the model server to be connected with timeout
+    print("Waiting for vLLM server to start...")
+    server_ready = False
+    for i in range(360):  # Wait up to 6 minutes
         if all([check_port(int(port)) for port in ports_list]):
+            server_ready = True
+            print(f"vLLM server is ready on ports: {ports_list}")
             break
         else:
+            if i % 10 == 0:  # Print every 10 seconds
+                print(f"Still waiting for server... ({i}/360 seconds)")
             time.sleep(1)
+    
+    if not server_ready:
+        print(f"ERROR: vLLM server failed to start within 2 minutes on ports: {ports_list}")
+        print("Please make sure the vLLM server is running before running the benchmark.")
+        print("You can start it using: bash run_server.sh <model_path> <port> <tp_size> ...")
+        return
 
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_id,
                                                  trust_remote_code=args.trust_remote_code)
@@ -560,7 +615,8 @@ def main(args: argparse.Namespace):
         input_requests = sample_default_requests(
             dataset_path=args.dataset_path,
             num_requests=args.num_prompts,
-            tokenizer=tokenizer
+            tokenizer=tokenizer,
+            sequence_profile_path=args.sequence_profile_path,
         )
         print(f'Sample Default Dataset! Dataset Name:{args.dataset_name}')
 
@@ -673,7 +729,7 @@ if __name__ == "__main__":
         default=None,
         help="Server or API base url if not using http host and port.",
     )
-    parser.add_argument("--host", type=str, default="localhost")
+    parser.add_argument("--host", type=str, default="192.168.50.186")
     parser.add_argument("--port", type=str, default=8000, help="API port: multiple ports is '8000,8001'.")
     parser.add_argument(
         "--endpoint",
@@ -698,6 +754,12 @@ if __name__ == "__main__":
                         type=str,
                         default=None,
                         help="Path to the dataset.")
+    parser.add_argument("--sequence-profile-path",
+                        type=str,
+                        default=None,
+                        help="Path to sequence_profile.json with actual_output_tokens. "
+                             "When provided, uses actual_output_tokens as output_len for matching question_id, "
+                             "simulating more realistic load distribution.")
     parser.add_argument(
         "--model",
         type=str,
