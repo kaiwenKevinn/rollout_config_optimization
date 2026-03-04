@@ -15,24 +15,29 @@ from abc import ABC, abstractmethod
 from ..models.base_model import BaseModel
 
 
-def get_hard_constr(x, max_sequence_length, num_hard_constr, py, space):
+def get_hard_constr(x, max_sequence_length, num_hard_constr, py, space, xe=None, gpu_nums=None):
+    """硬约束：max_num_seqs <= max_num_batched_tokens；tp * pp <= gpu_nums。"""
     out_hard_constr = torch.zeros(py.shape[0], num_hard_constr)
     if num_hard_constr > 0 and space:
-        condition_id_chunked = space.numeric_names.index("enable_chunked_prefill")
-        condition_id_prefix = space.numeric_names.index("enable_prefix_caching")
+        idx = 0
         constr_id_max_seqs = space.numeric_names.index("max_num_seqs")
         constr_id_max_batched_tokens = space.numeric_names.index("max_num_batched_tokens")
-
-        out_hard_constr[:, 0] = (1 - x[:, condition_id_chunked]) * (
-                max_sequence_length - x[:, constr_id_max_batched_tokens]) - 1e-5
-        out_hard_constr[:, 1] = x[:, constr_id_max_seqs] - x[:, constr_id_max_batched_tokens]
-        out_hard_constr[:, 2] = x[:, condition_id_chunked] + x[:, condition_id_prefix] - 1.0
+        # 约束1：max_num_seqs <= max_num_batched_tokens
+        out_hard_constr[:, idx] = x[:, constr_id_max_seqs] - x[:, constr_id_max_batched_tokens]
+        idx += 1
+        # 约束2：tp * pp <= gpu_nums
+        if idx < num_hard_constr and "tp" in space.numeric_names and "pipeline_parallel_size" in space.numeric_names:
+            gpu_nums = gpu_nums if gpu_nums is not None else torch.cuda.device_count()
+            xe_t = xe if xe is not None else torch.zeros(x.shape[0], len(space.enum_names), dtype=torch.long, device=x.device)
+            df_X = space.inverse_transform(x, xe_t)
+            tp_pp = df_X["tp"].values * df_X["pipeline_parallel_size"].values
+            out_hard_constr[:, idx] = torch.from_numpy(tp_pp).float().to(x.device) - float(gpu_nums)
     return out_hard_constr
 
 def get_hidden_constr(x, xe, rf_with_thres, num_hidden_constr, py, space):
-    # constraints from rf
+    # constraints from rf (当 rf 为 None 时返回全 0，即约束满足)
     out_hidden_constr = torch.zeros(py.shape[0], num_hidden_constr)
-    if num_hidden_constr > 0 and space:
+    if num_hidden_constr > 0 and space and rf_with_thres and rf_with_thres[0] is not None:
         df_X = space.inverse_transform(x, xe)
         df_X_numpy = df_X.to_numpy()
         out_hidden_constr[:, 0] = rf_with_thres[1] - torch.from_numpy(
@@ -261,7 +266,7 @@ class MACEConstr(Acquisition):
             
              # constraints from prior
             out_hard_constr = get_hard_constr(x, self.max_sequence_length,
-                                              self.num_hard_constr, py, self.space)
+                                              self.num_hard_constr, py, self.space, xe=xe)
             # constraints from rf
             out_hidden_constr = get_hidden_constr(x, xe, self.rf_with_thres,
                                                   self.num_hidden_constr, py, self.space)
@@ -407,7 +412,7 @@ class GeneralAcq(Acquisition):
             
              # constraints from prior
             out_hard_constr = get_hard_constr(x, self.max_sequence_length,
-                                              self.num_hard_constr, py, self.space)
+                                              self.num_hard_constr, py, self.space, xe=xe)
             # constraints from rf
             out_hidden_constr = get_hidden_constr(x, xe, self.rf_with_thres,
                                                   self.num_hidden_constr, py, self.space)

@@ -159,12 +159,18 @@ def sample_default_requests(
     # Load the dataset.
     with open(dataset_path) as f:
         data = json.load(f)
-        # Extract questions from the dataset structure
+
+    # 支持两种格式: 1) questions 数组  2) sequence_profile 格式 (sequences 数组，如 sequence_profile_bucket_0.json)
+    if 'sequences' in data:
+        # Sequence profile 格式: 每个元素有 prompt, question_id, actual_output_tokens, input_tokens 等
+        items = data['sequences']
+        print(f"Loaded {len(items)} sequences from profile format: {dataset_path}")
+    else:
         items = data.get('questions', data)  # Use 'questions' field if exists, otherwise use whole data
 
-    # Load sequence profile for actual_output_tokens when provided
+    # Load sequence profile for actual_output_tokens when provided (仅当 dataset 本身非 profile 格式时)
     actual_output_map = {}
-    if sequence_profile_path is not None and os.path.exists(sequence_profile_path):
+    if sequence_profile_path is not None and os.path.exists(sequence_profile_path) and 'sequences' not in data:
         with open(sequence_profile_path) as f:
             profile = json.load(f)
         for seq in profile.get('sequences', []):
@@ -173,7 +179,7 @@ def sample_default_requests(
             if qid is not None and act_out is not None:
                 actual_output_map[qid] = int(act_out)
         print(f"Loaded {len(actual_output_map)} actual_output_tokens from sequence_profile: {sequence_profile_path}")
-    
+
     if num_requests > len(items):
         print(f"Warning: num_requests ({num_requests}) is greater than dataset size ({len(items)}). Using all available samples.")
         num_requests = len(items)
@@ -183,10 +189,20 @@ def sample_default_requests(
     sampled_prompts = []
     for i in range(num_requests):
         try:
+            # input_len: 优先 sequence profile 的 input_tokens，否则 tokenize
             if 'input_len' not in items[i]:
-                items[i]['input_len'] = len(tokenizer(items[i]['prompt']).input_ids)
-            
-            # 优先从 sequence_profile 的 actual_output_tokens 获取（更接近真实负载）
+                if 'input_tokens' in items[i]:
+                    items[i]['input_len'] = int(items[i]['input_tokens'])
+                else:
+                    items[i]['input_len'] = len(tokenizer(items[i]['prompt']).input_ids)
+
+            # output_len: 优先级 1) 当前项的 actual_output_tokens  2) sequence_profile 映射  3) 响应内容  4) 默认 128
+            if 'actual_output_tokens' in items[i]:
+                items[i]['output_len'] = int(items[i]['actual_output_tokens'])
+                sampled_prompts.append((items[i]['prompt'], items[i]['input_len'],
+                                        items[i]['output_len']))
+                continue
+
             if actual_output_map and 'question_id' in items[i]:
                 qid = items[i]['question_id']
                 if qid in actual_output_map:
@@ -671,6 +687,7 @@ def main(args: argparse.Namespace):
         result_json["enable_prefix_caching"] = args.enable_prefix_caching
         result_json["disable_custom_all_reduce"] = args.disable_custom_all_reduce
         result_json["use_v2_block_manager"] = args.use_v2_block_manager
+        result_json["enable_expert_parallel"] = args.enable_expert_parallel
         result_json["block_size"] = args.block_size
         result_json["scheduler_delay_factor"] = args.scheduler_delay_factor
         result_json["max_concurrent_requests"] = args.max_concurrent_requests
@@ -897,6 +914,12 @@ if __name__ == "__main__":
         type=str,
         choices=["True", "False"],
         help="""use-v2-block-manager to the benchmark_pipline.sh""")
+    parser.add_argument(
+        '--enable-expert-parallel',
+        type=str,
+        default="False",
+        choices=["True", "False"],
+        help="""enable-expert-parallel for MoE models""")
     args = parser.parse_args()
 
     res_dir_path = os.environ.get("RES_DIR_PATH", None)

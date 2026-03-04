@@ -45,15 +45,16 @@ def read_historical_data(res_dir_path):
             with open(file_path, 'r') as f:
                 res = json.load(f)
 
+            # 可调优参数：tp, pipeline_parallel_size, max_num_seqs, max_num_batched_tokens, block_size, scheduler_delay_factor, enable_expert_parallel
+            pp = res.get('pp', res.get('pipeline_parallel_size', 1))
+            enable_expert = res.get('enable_expert_parallel', 'False')
             xx.append({"tp": res['tp'],
+                       "pipeline_parallel_size": pp,
                        "max_num_seqs": res["max_num_seqs"],
                        "max_num_batched_tokens": res["max_num_batched_tokens"],
                        "block_size": res["block_size"],
-                       "enable_chunked_prefill": [True if res["enable_chunked_prefill"] == 'True' else False][0],
                        "scheduler_delay_factor": int(res["scheduler_delay_factor"] * 10),
-                       "enable_prefix_caching": [True if res["enable_prefix_caching"] == 'True' else False][0],
-                       "disable_custom_all_reduce": [True if res["disable_custom_all_reduce"] == 'True' else False][0],
-                       "use_v2_block_manager": [True if res["use_v2_block_manager"] == 'True' else False][0]}
+                       "enable_expert_parallel": enable_expert == 'True' or enable_expert is True}
                     )
             # 多目标优化
             # yy.append([-1 * res["request_throughput"],

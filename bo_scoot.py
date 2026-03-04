@@ -81,21 +81,25 @@ def add_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
 def run_benchmark_pipeline(combination: Tuple, gpu_nums, args):
     tp_size = combination[0]
-    ports = ",".join([str(8000 + i) for i in range(int(gpu_nums / tp_size))])
+    pp_size = combination[1]
+    world_size = tp_size * pp_size
+    num_replicas = int(gpu_nums / world_size)
+    ports = ",".join([str(8000 + i) for i in range(num_replicas)])
     gpus = [str(i) for i in range(gpu_nums)]
-    grouped_gpus = [','.join(gpus[i:i + tp_size]) for i in range(0, gpu_nums, tp_size)]
+    grouped_gpus = [','.join(gpus[i:i + world_size]) for i in range(0, gpu_nums, world_size)]
     grouped_gpus_string = '#'.join(grouped_gpus)
-    raw_file_path = os.path.join(RAW_DIR, f'benchmark_tp_{combination[0]}_mns_{combination[1]}_mnbt_{combination[2]}_bs_{combination[3]}.txt')
+    # combination: [0]=tp, [1]=pp, [2]=mns, [3]=mnbt, [4]=bs, [5]=sdf, [6-9]=fixed, [10]=enable_expert_parallel
+    raw_file_path = os.path.join(RAW_DIR, f'benchmark_tp_{combination[0]}_pp_{combination[1]}_mns_{combination[2]}_mnbt_{combination[3]}_bs_{combination[4]}.txt')
     seq_profile = args.sequence_profile_path or ""
     for i in range(3):
         # retry 3 times in case of failure
         try:
             logging.info(
-                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {1} {combination[1]} {combination[2]} {combination[5]} {combination[3]} {ports} {grouped_gpus_string} {args.model} {combination[4]} {args.dataset_name} {combination[6]} {combination[7]} {combination[8]} {seq_profile} "
+                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {combination[1]} {combination[2]} {combination[3]} {combination[5]} {combination[4]} {ports} {grouped_gpus_string} {args.model} {combination[6]} {args.dataset_name} {combination[7]} {combination[8]} {combination[9]} {seq_profile} {combination[10]} "
                 f"2>&1 | tee {raw_file_path}")
             seq_profile = args.sequence_profile_path or ""
             os.system(
-                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {1} {combination[1]} {combination[2]} {combination[5]} {combination[3]} {ports} {grouped_gpus_string} {args.model} {combination[4]} {args.dataset_name} {combination[6]} {combination[7]} {combination[8]} {seq_profile} "
+                f"bash benchmark_pipeline.sh {args.model_path} {args.dataset_path} {args.request_rate} {args.num_requests} {args.pressure_test} {0} {combination[0]} {combination[1]} {combination[2]} {combination[3]} {combination[5]} {combination[4]} {ports} {grouped_gpus_string} {args.model} {combination[6]} {args.dataset_name} {combination[7]} {combination[8]} {combination[9]} {seq_profile} {combination[10]} "
                 f"2>&1 | tee {raw_file_path}")
             break
         except Exception:
@@ -103,38 +107,48 @@ def run_benchmark_pipeline(combination: Tuple, gpu_nums, args):
 
 
 def obj(rec: pd.DataFrame, gpu_nums, res_dir_path, args, min_world_size: int = 1) -> Union[None, np.ndarray]:
+    # 固定为 True：enable_chunked_prefill, enable_prefix_caching, disable_custom_all_reduce, use_v2_block_manager
     combination = (
         int(rec['tp'].tolist()[0]),
+        int(rec['pipeline_parallel_size'].tolist()[0]),
         int(rec['max_num_seqs'].tolist()[0]),
         int(rec['max_num_batched_tokens'].tolist()[0]),
         int(rec['block_size'].tolist()[0]),
-        str(rec['enable_chunked_prefill'].tolist()[0]),
         float(rec['scheduler_delay_factor'].tolist()[0] / 10),
-        str(rec['enable_prefix_caching'].tolist()[0]),
-        str(rec['disable_custom_all_reduce'].tolist()[0]),
-        str(rec['use_v2_block_manager'].tolist()[0])
+        "True",   # enable_chunked_prefill (固定)
+        "True",   # enable_prefix_caching (固定)
+        "True",   # disable_custom_all_reduce (固定)
+        "True",   # use_v2_block_manager (固定)
+        str(rec['enable_expert_parallel'].tolist()[0]),  # enable_expert_parallel (可调优)
     )
 
     # clear processes and ports sequentially
     try:
-        os.system(f'pgrep -f "clients.api_server" | xargs kill -9')
+        os.system(f'pgrep -f "clients.api_server" | xargs kill -9 2>/dev/null || true')
     except Exception as e:
         print("Kill Whole Process Error:", e)
+    # 增加等待时间，确保 benchmark_pipeline 杀进程后端口完全释放（含 TIME_WAIT）
+    time.sleep(15)
     # check the ports in the last round is cleared. If not, close them
     ports = ",".join([str(8000 + i) for i in range(int(gpu_nums / min_world_size))])
-    for port in ports.split(','):
-        for _ in range(3):
-            if check_port(int(port)):
-                logging.info(f'port {int(port)} is not cleared. Closing it!!!')
+    for port_str in ports.split(','):
+        port_num = int(port_str)
+        for retry in range(5):
+            if check_port(port_num):
+                logging.info(f'port {port_num} is not cleared (retry {retry + 1}/5). Closing it!!!')
                 try:
-                    os.system(f"lsof -t -i:{int(port)} | xargs kill -9")
+                    os.system(f"lsof -t -i:{port_num} | xargs kill -9 2>/dev/null || true")
                 except Exception as e:
                     print("Kill Port Process Error:", e)
+                time.sleep(5)
             else:
                 break
-        assert not check_port(
-            int(port)), "For some reason, the ports are not cleared! Experiments cannot continue!!"
-    time.sleep(5)  
+        if check_port(port_num):
+            raise RuntimeError(
+                f"Port {port_num} is not cleared after retries. "
+                "Previous vLLM process may still be holding it. Try: pkill -9 -f clients.api_server"
+            )
+    time.sleep(5)
     run_benchmark_pipeline(combination, gpu_nums, args)
 
     # 取最新的 vllm 结果文件（benchmark 失败时可能无新文件或取到旧配置）
@@ -151,15 +165,20 @@ def obj(rec: pd.DataFrame, gpu_nums, res_dir_path, args, min_world_size: int = 1
         act_result = json.load(f)
 
     # check wether the result from the latest file ("act_result") is indeed the output of actual env from the "rec"
+    # 固定配置均为 True；pp 对应 pipeline_parallel_size
+    act_pp = act_result.get('pp', act_result.get('pipeline_parallel_size', 1))
+    act_enable_expert = act_result.get('enable_expert_parallel', 'False')
     if combination == (int(act_result['tp']),
+                       int(act_pp),
                        int(act_result['max_num_seqs']),
                        int(act_result['max_num_batched_tokens']),
                        int(act_result['block_size']),
-                       str(act_result['enable_chunked_prefill']),
                        float(act_result['scheduler_delay_factor']),
+                       str(act_result['enable_chunked_prefill']),
                        str(act_result['enable_prefix_caching']),
                        str(act_result['disable_custom_all_reduce']),
-                       str(act_result['use_v2_block_manager'])):
+                       str(act_result['use_v2_block_manager']),
+                       str(act_enable_expert)):
         # return np.array(
         #     [[
         #         -1 * act_result["request_throughput"],
@@ -203,16 +222,16 @@ def obtain_random_forest_train_set(rec_history):
     x = []
     y = []
     for data_item in rec_history:
+        # 可调优参数：tp, pipeline_parallel_size, max_num_seqs, max_num_batched_tokens, block_size, scheduler_delay_factor, enable_expert_parallel
+        rec0 = data_item['rec'][0]
         x.append([
-            data_item['rec'][0]['tp'],
-            data_item['rec'][0]['max_num_seqs'],
-            data_item['rec'][0]['max_num_batched_tokens'],
-            data_item['rec'][0]['block_size'],
-            1 if data_item['rec'][0]['enable_chunked_prefill'] else 0,
-            data_item['rec'][0]['scheduler_delay_factor'],
-            1 if data_item['rec'][0]['enable_prefix_caching'] else 0,
-            1 if data_item['rec'][0]['disable_custom_all_reduce'] else 0,
-            1 if data_item['rec'][0]['use_v2_block_manager'] else 0
+            rec0['tp'],
+            rec0.get('pipeline_parallel_size', 1),
+            rec0['max_num_seqs'],
+            rec0['max_num_batched_tokens'],
+            rec0['block_size'],
+            rec0['scheduler_delay_factor'],
+            1 if rec0.get('enable_expert_parallel', False) else 0,
         ])
         y.append(0 if data_item['obj'] is None else 1)
     return {'train_x': x, 'train_y': y}
@@ -273,17 +292,16 @@ def main(args):
         logging.info(f"Min World Size: {min_world_size}, "
                      f"Max World Size: {gpu_nums}"
                     )
+        # 固定为 True 的配置：enable_chunked_prefill, enable_prefix_caching, disable_custom_all_reduce, use_v2_block_manager
         para_dict = [
                     {"name": "tp", "type": "int_exponent", "lb": max(min_world_size, 2), "ub": gpu_nums, "base": 2},
-                     {"name": "max_num_seqs", "type": "int_exponent", "lb": 64, "ub": 8192, "base": 2},     # 8192 for 8卡单实例调优, 2048 for 4卡单实例调优 或 多实例调优
+                    {"name": "pipeline_parallel_size", "type": "int_exponent", "lb": 1, "ub": gpu_nums, "base": 2},
+                    {"name": "max_num_seqs", "type": "int_exponent", "lb": 64, "ub": 8192, "base": 2},     # 8192 for 8卡单实例调优, 2048 for 4卡单实例调优 或 多实例调优
                      {"name": "max_num_batched_tokens", "type": "pow_int",  # "ub": int(2 ** (8 + gpu_nums))
                       "lb": 64, 'ub': max(32768, max_sequence_length * 2), "base": 2},
-                     {"name": "block_size", "type": "int_exponent", "lb": 8, "ub": 32, "base": 2},
-                     {"name": "enable_chunked_prefill", "type": "bool"},
+                     {"name": "block_size", "type": "int_exponent", "lb": 16, "ub": 64, "base": 2},
                      {"name": "scheduler_delay_factor", 'type': "step_int", "lb": 0, "ub": 20, "step": 2},
-                     {"name": "enable_prefix_caching", "type": "bool"},
-                     {"name": "disable_custom_all_reduce", "type": "bool"},
-                     {"name": "use_v2_block_manager", "type": "bool"},
+                    {"name": "enable_expert_parallel", "type": "bool"},
                     ]
 
         space = DesignSpace().parse(para_dict)
@@ -298,14 +316,13 @@ def main(args):
             ref_rec = pd.DataFrame.from_dict(
                 {
                 "tp": [min_world_size],
+                "pipeline_parallel_size": [1],
                 "max_num_seqs": [256],
                 "max_num_batched_tokens": [max(4096, max_sequence_length)],
                 "block_size": [16],
-                "enable_chunked_prefill": [False],
                 "scheduler_delay_factor": [0.0],
-                "enable_prefix_caching": [False],
-                "disable_custom_all_reduce": [False],
-                "use_v2_block_manager": [False],
+                "enable_expert_parallel": [False],
+                # enable_chunked_prefill, enable_prefix_caching, disable_custom_all_reduce, use_v2_block_manager 固定为 True
                  })
             ref_point = obj(ref_rec, gpu_nums, res_dir_path, args, min_world_size=min_world_size)
             logging.info(f'ref config: {ref_rec}')
@@ -318,7 +335,7 @@ def main(args):
             opt = GeneralBO(space=space,
                             num_obj=args.num_obj,
                             num_model_constr=0,
-                            num_hard_constr=3,
+                            num_hard_constr=2,
                             num_hidden_constr=1,
                             ref_point=ref_point,
                             model_config={"optimizer": "adam", "base_model_name": "gpy", "space": space},
@@ -330,7 +347,7 @@ def main(args):
             opt = HEBOConstr( 
                 space=space,
                 num_model_constr=0,
-                num_hard_constr=3,
+                num_hard_constr=2,
                 num_hidden_constr=1,
                 max_sequence_length=ref_max_seq_len,
             )

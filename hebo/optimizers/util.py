@@ -49,9 +49,33 @@ def parse_space_from_bayesmark(api_config) -> DesignSpace:
 
 
 def ensure_hard_constr(samples, max_sequence_length):
-    samples = samples.apply(prefix_chunked_update, axis=1)
+    samples = samples.copy()
+    # 约束：tp * pipeline_parallel_size <= gpu_nums，pp 须为 2 的幂
+    if 'pipeline_parallel_size' in samples.columns and 'tp' in samples.columns:
+        try:
+            import torch
+            import math
+            gpu_nums = torch.cuda.device_count()
+            invalid = samples['tp'] * samples['pipeline_parallel_size'] > gpu_nums
+            if invalid.any():
+                max_pp = (gpu_nums // samples.loc[invalid, 'tp']).clip(lower=1).astype(int)
+                # pp 为 int_exponent(base=2)，取 <= max_pp 的最大 2 的幂
+                new_pp = max_pp.apply(lambda m: 2 ** int(math.floor(math.log2(m))) if m >= 1 else 1)
+                samples.loc[invalid, 'pipeline_parallel_size'] = new_pp
+        except Exception:
+            pass
+    # enable_chunked_prefill 等固定为 True，临时添加以便 update_max_num_batched_tokens 能执行
+    if 'enable_chunked_prefill' not in samples.columns:
+        samples['enable_chunked_prefill'] = True
+        samples['enable_prefix_caching'] = True
+        samples['disable_custom_all_reduce'] = True
+        samples['use_v2_block_manager'] = True
     samples = samples.apply(update_max_num_batched_tokens, axis=1, max_sequence_length=max_sequence_length)
     samples.loc[samples['max_num_batched_tokens'] < samples['max_num_seqs'], 'max_num_seqs'] = samples['max_num_batched_tokens']
+    # 移除临时添加的列
+    drop_cols = [c for c in ['enable_chunked_prefill', 'enable_prefix_caching', 'disable_custom_all_reduce', 'use_v2_block_manager'] if c in samples.columns]
+    if drop_cols:
+        samples = samples.drop(columns=drop_cols)
     return samples
 
 

@@ -19,6 +19,7 @@ enable_prefix_caching=${17}
 disable_custom_all_reduce=${18}
 use_v2_block_manager=${19}
 sequence_profile_path=${20:-}
+enable_expert_parallel=${21:-False}
 
 additional_options=""
 if [ "${pressure_test}" == "True" ]; then
@@ -49,6 +50,7 @@ echo python -m clients.benchmark_serving \
             --enable-prefix-caching ${enable_prefix_caching}\
             --disable-custom-all-reduce ${disable_custom_all_reduce}\
             --use-v2-block-manager ${use_v2_block_manager}\
+            --enable-expert-parallel ${enable_expert_parallel}\
             --trust-remote-code\
             --disable-tqdm\
             --seed 42\
@@ -74,6 +76,7 @@ python -m clients.benchmark_serving \
             --enable-prefix-caching ${enable_prefix_caching}\
             --disable-custom-all-reduce ${disable_custom_all_reduce}\
             --use-v2-block-manager ${use_v2_block_manager}\
+            --enable-expert-parallel ${enable_expert_parallel}\
             --trust-remote-code\
             --disable-tqdm\
             --seed 42\

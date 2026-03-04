@@ -1,0 +1,371 @@
+nohup: ignoring input
+设置 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+实际可用GPU数量: 8
+tuner_conf.sh
+python tuner_conf.py --model_path /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+tuner_conf: model_path=/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137
+Loading checkpoint shards:   0%|          | 0/17 [00:00<?, ?it/s]Loading checkpoint shards:   6%|▌         | 1/17 [00:02<00:42,  2.63s/it]Loading checkpoint shards:  12%|█▏        | 2/17 [00:03<00:21,  1.40s/it]Loading checkpoint shards:  18%|█▊        | 3/17 [00:03<00:14,  1.02s/it]Loading checkpoint shards:  24%|██▎       | 4/17 [00:04<00:10,  1.20it/s]Loading checkpoint shards:  29%|██▉       | 5/17 [00:04<00:08,  1.38it/s]Loading checkpoint shards:  35%|███▌      | 6/17 [00:05<00:07,  1.52it/s]Loading checkpoint shards:  41%|████      | 7/17 [00:05<00:06,  1.63it/s]Loading checkpoint shards:  47%|████▋     | 8/17 [00:06<00:05,  1.70it/s]Loading checkpoint shards:  53%|█████▎    | 9/17 [00:06<00:04,  1.75it/s]Loading checkpoint shards:  59%|█████▉    | 10/17 [00:07<00:03,  1.78it/s]Loading checkpoint shards:  65%|██████▍   | 11/17 [00:08<00:03,  1.81it/s]Loading checkpoint shards:  71%|███████   | 12/17 [00:09<00:03,  1.40it/s]Loading checkpoint shards:  76%|███████▋  | 13/17 [00:09<00:02,  1.52it/s]Loading checkpoint shards:  82%|████████▏ | 14/17 [00:11<00:02,  1.13it/s]Loading checkpoint shards:  88%|████████▊ | 15/17 [00:11<00:01,  1.29it/s]Loading checkpoint shards:  94%|█████████▍| 16/17 [00:12<00:00,  1.43it/s]Loading checkpoint shards: 100%|██████████| 17/17 [00:12<00:00,  1.81it/s]Loading checkpoint shards: 100%|██████████| 17/17 [00:12<00:00,  1.38it/s]
+model size: 59.57523536682129 kv cache param size: 40.0 total memory consumption: 99.57523536682129 available gpu memory capacity 71.3256591796875 min_world_size: 2
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+benchmark_pipeine.sh
+model_path=/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137
+dataset_path=/research/d1/gds/ytyang/kwchen/hetero_rollout/results/gpqa_test/classification_by_range/sequence_profile_bucket_3.json /research/d1/gds/ytyang/kwchen/hetero_rollout/results/gpqa_test/classification_by_range/sequence_profile_bucket_3.json
+request_rate=163 163
+num_requests=163 163
+pressure_test=False False
+max_concurrent_requests=0 0
+tp_size=2 2
+pp_size=1 1
+max_num_seqs=64 64
+max_num_batched_tokens=4096 4096
+scheduler_delay_factor=0.6 0.6
+block_size=64 64
+port=8000,8001,8002,8003 8000,8001,8002,8003
+device_group=0,1#2,3#4,5#6,7 0,1#2,3#4,5#6,7
+model=Qwen3_32B Qwen3_32B
+enable_chunked_prefill=True True
+dataset_name=gpqa_diamond_bucket_0 gpqa_diamond_bucket_0
+enable_prefix_caching=True True
+disable_custom_all_reduce=True True
+use_v2_block_manager=True True
+sequence_profile_path=True True
+enable_expert_parallel= False
+server start!
+device:0,1
+addr:8000
+device:2,3
+addr:8001
+device:4,5
+addr:8002
+device:6,7
+addr:8003
+finish server start!
+client start!
+run_server.sh
+tp_size 2
+pp_size 1
+enable_chunked_prefill True
+enable_prefix_caching True
+disable_custom_all_reduce True
+use_v2_block_manager True
+enable_expert_parallel False
+python -m clients.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --disable-log-requests --max-num-batched-tokens 32768 --max-num-seqs 64 --scheduler-delay-factor 0.6 --port 8001 --tensor-parallel-size 2 --pipeline-parallel-size 1 --block-size 64 --gpu-memory-utilization 0.9 --trust-remote-code --enforce-eager --disable-async-output-proc --rope-scaling {"rope_type": "linear", "factor": 1.0} --enable-chunked-prefill --enable-prefix-caching --disable-custom-all-reduce --use-v2-block-manager
+run_server.sh
+tp_size 2
+pp_size 1
+enable_chunked_prefill True
+enable_prefix_caching True
+disable_custom_all_reduce True
+use_v2_block_manager True
+enable_expert_parallel False
+python -m clients.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --disable-log-requests --max-num-batched-tokens 32768 --max-num-seqs 64 --scheduler-delay-factor 0.6 --port 8003 --tensor-parallel-size 2 --pipeline-parallel-size 1 --block-size 64 --gpu-memory-utilization 0.9 --trust-remote-code --enforce-eager --disable-async-output-proc --rope-scaling {"rope_type": "linear", "factor": 1.0} --enable-chunked-prefill --enable-prefix-caching --disable-custom-all-reduce --use-v2-block-manager
+run_server.sh
+tp_size 2
+pp_size 1
+enable_chunked_prefill True
+enable_prefix_caching True
+disable_custom_all_reduce True
+use_v2_block_manager True
+enable_expert_parallel False
+run_client.sh
+run_server.sh
+tp_size 2
+pp_size 1
+python -m clients.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --disable-log-requests --max-num-batched-tokens 32768 --max-num-seqs 64 --scheduler-delay-factor 0.6 --port 8000 --tensor-parallel-size 2 --pipeline-parallel-size 1 --block-size 64 --gpu-memory-utilization 0.9 --trust-remote-code --enforce-eager --disable-async-output-proc --rope-scaling {"rope_type": "linear", "factor": 1.0} --enable-chunked-prefill --enable-prefix-caching --disable-custom-all-reduce --use-v2-block-manager
+enable_chunked_prefill True
+enable_prefix_caching True
+disable_custom_all_reduce True
+use_v2_block_manager True
+enable_expert_parallel False
+python -m clients.benchmark_serving --backend vllm --tokenizer /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --dataset-name gpqa_diamond_bucket_0 --dataset-path /research/d1/gds/ytyang/kwchen/hetero_rollout/results/gpqa_test/classification_by_range/sequence_profile_bucket_3.json --request-rate 163 --model Qwen3_32B --num-prompts 163 --save-result --max-num-batched-tokens 4096 --max-num-seqs 64 --scheduler-delay-factor 0.6 --enable-chunked-prefill True --tensor-parallel-size 2 --pipeline-parallel-size 1 --block-size 64 --port 8000,8001,8002,8003 --enable-prefix-caching True --disable-custom-all-reduce True --use-v2-block-manager True --enable-expert-parallel False --trust-remote-code --disable-tqdm --seed 42 --sequence-profile-path True
+python -m clients.api_server --model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137 --disable-log-requests --max-num-batched-tokens 32768 --max-num-seqs 64 --scheduler-delay-factor 0.6 --port 8002 --tensor-parallel-size 2 --pipeline-parallel-size 1 --block-size 64 --gpu-memory-utilization 0.9 --trust-remote-code --enforce-eager --disable-async-output-proc --rope-scaling {"rope_type": "linear", "factor": 1.0} --enable-chunked-prefill --enable-prefix-caching --disable-custom-all-reduce --use-v2-block-manager
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+INFO 03-04 11:31:02 [__init__.py:243] Automatically detected platform cuda.
+INFO 03-04 11:31:02 [__init__.py:243] Automatically detected platform cuda.
+INFO 03-04 11:31:03 [__init__.py:243] Automatically detected platform cuda.
+INFO 03-04 11:31:03 [__init__.py:243] Automatically detected platform cuda.
+INFO 03-04 11:31:13 [__init__.py:31] Available plugins for group vllm.general_plugins:
+INFO 03-04 11:31:13 [__init__.py:33] - lora_filesystem_resolver -> vllm.plugins.lora_resolvers.filesystem_resolver:register_filesystem_resolver
+INFO 03-04 11:31:13 [__init__.py:36] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 03-04 11:31:13 [__init__.py:31] Available plugins for group vllm.general_plugins:
+INFO 03-04 11:31:13 [__init__.py:33] - lora_filesystem_resolver -> vllm.plugins.lora_resolvers.filesystem_resolver:register_filesystem_resolver
+INFO 03-04 11:31:13 [__init__.py:36] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 03-04 11:31:13 [__init__.py:31] Available plugins for group vllm.general_plugins:
+INFO 03-04 11:31:13 [__init__.py:33] - lora_filesystem_resolver -> vllm.plugins.lora_resolvers.filesystem_resolver:register_filesystem_resolver
+INFO 03-04 11:31:13 [__init__.py:36] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 03-04 11:31:14 [api_server.py:155] vLLM API server version 0.9.0
+INFO 03-04 11:31:14 [api_server.py:156] args: Namespace(host=None, port=8002, ssl_keyfile=None, ssl_certfile=None, ssl_ca_certs=None, ssl_cert_reqs=0, root_path=None, log_level='debug', model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', task='auto', tokenizer=None, tokenizer_mode='auto', trust_remote_code=True, dtype='auto', seed=None, hf_config_path=None, allowed_local_media_path='', revision=None, code_revision=None, rope_scaling={'rope_type': 'linear', 'factor': 1.0}, rope_theta=None, tokenizer_revision=None, max_model_len=None, quantization=None, enforce_eager=True, max_seq_len_to_capture=8192, max_logprobs=20, disable_sliding_window=False, disable_cascade_attn=False, skip_tokenizer_init=False, enable_prompt_embeds=False, served_model_name=None, disable_async_output_proc=True, config_format='auto', hf_token=None, hf_overrides={}, override_neuron_config={}, override_pooler_config=None, logits_processor_pattern=None, generation_config='auto', override_generation_config={}, enable_sleep_mode=False, model_impl='auto', load_format='auto', download_dir=None, model_loader_extra_config={}, ignore_patterns=None, use_tqdm_on_load=True, qlora_adapter_name_or_path=None, pt_load_map_location='cpu', guided_decoding_backend='auto', guided_decoding_disable_fallback=False, guided_decoding_disable_any_whitespace=False, guided_decoding_disable_additional_properties=False, enable_reasoning=None, reasoning_parser='', distributed_executor_backend=None, pipeline_parallel_size=1, tensor_parallel_size=2, data_parallel_size=1, data_parallel_size_local=None, data_parallel_address=None, data_parallel_rpc_port=None, enable_expert_parallel=False, max_parallel_loading_workers=None, ray_workers_use_nsight=False, disable_custom_all_reduce=True, worker_cls='auto', worker_extension_cls='', block_size=64, gpu_memory_utilization=0.9, swap_space=4, kv_cache_dtype='auto', num_gpu_blocks_override=None, enable_prefix_caching=True, prefix_caching_hash_algo='builtin', cpu_offload_gb=0, calculate_kv_scales=False, tokenizer_pool_size=0, tokenizer_pool_type='ray', tokenizer_pool_extra_config={}, limit_mm_per_prompt={}, mm_processor_kwargs=None, disable_mm_preprocessor_cache=False, enable_lora=None, enable_lora_bias=False, max_loras=1, max_lora_rank=16, lora_extra_vocab_size=256, lora_dtype='auto', long_lora_scaling_factors=None, max_cpu_loras=None, fully_sharded_loras=False, enable_prompt_adapter=None, max_prompt_adapters=1, max_prompt_adapter_token=0, device='auto', speculative_config=None, show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, max_num_batched_tokens=32768, max_num_seqs=64, max_num_partial_prefills=1, max_long_partial_prefills=1, cuda_graph_sizes=[512], long_prefill_token_threshold=0, num_lookahead_slots=0, scheduler_delay_factor=0.6, preemption_mode=None, num_scheduler_steps=1, multi_step_stream_outputs=True, scheduling_policy='fcfs', enable_chunked_prefill=True, disable_chunked_mm_input=False, scheduler_cls='vllm.core.scheduler.Scheduler', kv_transfer_config=None, kv_events_config=None, compilation_config={"inductor_compile_config": {"enable_auto_functionalized_v2": false}}, additional_config={}, use_v2_block_manager=True, disable_log_stats=False, disable_log_requests=True)
+WARNING 03-04 11:31:14 [config.py:454] The global random seed is set to 0. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.
+INFO 03-04 11:31:14 [config.py:520] Overriding HF config with {'rope_scaling': {'rope_type': 'linear', 'factor': 1.0}}
+INFO 03-04 11:31:14 [api_server.py:155] vLLM API server version 0.9.0
+INFO 03-04 11:31:14 [api_server.py:156] args: Namespace(host=None, port=8003, ssl_keyfile=None, ssl_certfile=None, ssl_ca_certs=None, ssl_cert_reqs=0, root_path=None, log_level='debug', model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', task='auto', tokenizer=None, tokenizer_mode='auto', trust_remote_code=True, dtype='auto', seed=None, hf_config_path=None, allowed_local_media_path='', revision=None, code_revision=None, rope_scaling={'rope_type': 'linear', 'factor': 1.0}, rope_theta=None, tokenizer_revision=None, max_model_len=None, quantization=None, enforce_eager=True, max_seq_len_to_capture=8192, max_logprobs=20, disable_sliding_window=False, disable_cascade_attn=False, skip_tokenizer_init=False, enable_prompt_embeds=False, served_model_name=None, disable_async_output_proc=True, config_format='auto', hf_token=None, hf_overrides={}, override_neuron_config={}, override_pooler_config=None, logits_processor_pattern=None, generation_config='auto', override_generation_config={}, enable_sleep_mode=False, model_impl='auto', load_format='auto', download_dir=None, model_loader_extra_config={}, ignore_patterns=None, use_tqdm_on_load=True, qlora_adapter_name_or_path=None, pt_load_map_location='cpu', guided_decoding_backend='auto', guided_decoding_disable_fallback=False, guided_decoding_disable_any_whitespace=False, guided_decoding_disable_additional_properties=False, enable_reasoning=None, reasoning_parser='', distributed_executor_backend=None, pipeline_parallel_size=1, tensor_parallel_size=2, data_parallel_size=1, data_parallel_size_local=None, data_parallel_address=None, data_parallel_rpc_port=None, enable_expert_parallel=False, max_parallel_loading_workers=None, ray_workers_use_nsight=False, disable_custom_all_reduce=True, worker_cls='auto', worker_extension_cls='', block_size=64, gpu_memory_utilization=0.9, swap_space=4, kv_cache_dtype='auto', num_gpu_blocks_override=None, enable_prefix_caching=True, prefix_caching_hash_algo='builtin', cpu_offload_gb=0, calculate_kv_scales=False, tokenizer_pool_size=0, tokenizer_pool_type='ray', tokenizer_pool_extra_config={}, limit_mm_per_prompt={}, mm_processor_kwargs=None, disable_mm_preprocessor_cache=False, enable_lora=None, enable_lora_bias=False, max_loras=1, max_lora_rank=16, lora_extra_vocab_size=256, lora_dtype='auto', long_lora_scaling_factors=None, max_cpu_loras=None, fully_sharded_loras=False, enable_prompt_adapter=None, max_prompt_adapters=1, max_prompt_adapter_token=0, device='auto', speculative_config=None, show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, max_num_batched_tokens=32768, max_num_seqs=64, max_num_partial_prefills=1, max_long_partial_prefills=1, cuda_graph_sizes=[512], long_prefill_token_threshold=0, num_lookahead_slots=0, scheduler_delay_factor=0.6, preemption_mode=None, num_scheduler_steps=1, multi_step_stream_outputs=True, scheduling_policy='fcfs', enable_chunked_prefill=True, disable_chunked_mm_input=False, scheduler_cls='vllm.core.scheduler.Scheduler', kv_transfer_config=None, kv_events_config=None, compilation_config={"inductor_compile_config": {"enable_auto_functionalized_v2": false}}, additional_config={}, use_v2_block_manager=True, disable_log_stats=False, disable_log_requests=True)
+WARNING 03-04 11:31:14 [config.py:454] The global random seed is set to 0. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.
+INFO 03-04 11:31:14 [config.py:520] Overriding HF config with {'rope_scaling': {'rope_type': 'linear', 'factor': 1.0}}
+INFO 03-04 11:31:14 [api_server.py:155] vLLM API server version 0.9.0
+INFO 03-04 11:31:14 [api_server.py:156] args: Namespace(host=None, port=8001, ssl_keyfile=None, ssl_certfile=None, ssl_ca_certs=None, ssl_cert_reqs=0, root_path=None, log_level='debug', model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', task='auto', tokenizer=None, tokenizer_mode='auto', trust_remote_code=True, dtype='auto', seed=None, hf_config_path=None, allowed_local_media_path='', revision=None, code_revision=None, rope_scaling={'rope_type': 'linear', 'factor': 1.0}, rope_theta=None, tokenizer_revision=None, max_model_len=None, quantization=None, enforce_eager=True, max_seq_len_to_capture=8192, max_logprobs=20, disable_sliding_window=False, disable_cascade_attn=False, skip_tokenizer_init=False, enable_prompt_embeds=False, served_model_name=None, disable_async_output_proc=True, config_format='auto', hf_token=None, hf_overrides={}, override_neuron_config={}, override_pooler_config=None, logits_processor_pattern=None, generation_config='auto', override_generation_config={}, enable_sleep_mode=False, model_impl='auto', load_format='auto', download_dir=None, model_loader_extra_config={}, ignore_patterns=None, use_tqdm_on_load=True, qlora_adapter_name_or_path=None, pt_load_map_location='cpu', guided_decoding_backend='auto', guided_decoding_disable_fallback=False, guided_decoding_disable_any_whitespace=False, guided_decoding_disable_additional_properties=False, enable_reasoning=None, reasoning_parser='', distributed_executor_backend=None, pipeline_parallel_size=1, tensor_parallel_size=2, data_parallel_size=1, data_parallel_size_local=None, data_parallel_address=None, data_parallel_rpc_port=None, enable_expert_parallel=False, max_parallel_loading_workers=None, ray_workers_use_nsight=False, disable_custom_all_reduce=True, worker_cls='auto', worker_extension_cls='', block_size=64, gpu_memory_utilization=0.9, swap_space=4, kv_cache_dtype='auto', num_gpu_blocks_override=None, enable_prefix_caching=True, prefix_caching_hash_algo='builtin', cpu_offload_gb=0, calculate_kv_scales=False, tokenizer_pool_size=0, tokenizer_pool_type='ray', tokenizer_pool_extra_config={}, limit_mm_per_prompt={}, mm_processor_kwargs=None, disable_mm_preprocessor_cache=False, enable_lora=None, enable_lora_bias=False, max_loras=1, max_lora_rank=16, lora_extra_vocab_size=256, lora_dtype='auto', long_lora_scaling_factors=None, max_cpu_loras=None, fully_sharded_loras=False, enable_prompt_adapter=None, max_prompt_adapters=1, max_prompt_adapter_token=0, device='auto', speculative_config=None, show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, max_num_batched_tokens=32768, max_num_seqs=64, max_num_partial_prefills=1, max_long_partial_prefills=1, cuda_graph_sizes=[512], long_prefill_token_threshold=0, num_lookahead_slots=0, scheduler_delay_factor=0.6, preemption_mode=None, num_scheduler_steps=1, multi_step_stream_outputs=True, scheduling_policy='fcfs', enable_chunked_prefill=True, disable_chunked_mm_input=False, scheduler_cls='vllm.core.scheduler.Scheduler', kv_transfer_config=None, kv_events_config=None, compilation_config={"inductor_compile_config": {"enable_auto_functionalized_v2": false}}, additional_config={}, use_v2_block_manager=True, disable_log_stats=False, disable_log_requests=True)
+WARNING 03-04 11:31:14 [config.py:454] The global random seed is set to 0. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.
+INFO 03-04 11:31:14 [config.py:520] Overriding HF config with {'rope_scaling': {'rope_type': 'linear', 'factor': 1.0}}
+INFO 03-04 11:31:18 [__init__.py:31] Available plugins for group vllm.general_plugins:
+INFO 03-04 11:31:18 [__init__.py:33] - lora_filesystem_resolver -> vllm.plugins.lora_resolvers.filesystem_resolver:register_filesystem_resolver
+INFO 03-04 11:31:18 [__init__.py:36] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 03-04 11:31:18 [api_server.py:155] vLLM API server version 0.9.0
+INFO 03-04 11:31:18 [api_server.py:156] args: Namespace(host=None, port=8000, ssl_keyfile=None, ssl_certfile=None, ssl_ca_certs=None, ssl_cert_reqs=0, root_path=None, log_level='debug', model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', task='auto', tokenizer=None, tokenizer_mode='auto', trust_remote_code=True, dtype='auto', seed=None, hf_config_path=None, allowed_local_media_path='', revision=None, code_revision=None, rope_scaling={'rope_type': 'linear', 'factor': 1.0}, rope_theta=None, tokenizer_revision=None, max_model_len=None, quantization=None, enforce_eager=True, max_seq_len_to_capture=8192, max_logprobs=20, disable_sliding_window=False, disable_cascade_attn=False, skip_tokenizer_init=False, enable_prompt_embeds=False, served_model_name=None, disable_async_output_proc=True, config_format='auto', hf_token=None, hf_overrides={}, override_neuron_config={}, override_pooler_config=None, logits_processor_pattern=None, generation_config='auto', override_generation_config={}, enable_sleep_mode=False, model_impl='auto', load_format='auto', download_dir=None, model_loader_extra_config={}, ignore_patterns=None, use_tqdm_on_load=True, qlora_adapter_name_or_path=None, pt_load_map_location='cpu', guided_decoding_backend='auto', guided_decoding_disable_fallback=False, guided_decoding_disable_any_whitespace=False, guided_decoding_disable_additional_properties=False, enable_reasoning=None, reasoning_parser='', distributed_executor_backend=None, pipeline_parallel_size=1, tensor_parallel_size=2, data_parallel_size=1, data_parallel_size_local=None, data_parallel_address=None, data_parallel_rpc_port=None, enable_expert_parallel=False, max_parallel_loading_workers=None, ray_workers_use_nsight=False, disable_custom_all_reduce=True, worker_cls='auto', worker_extension_cls='', block_size=64, gpu_memory_utilization=0.9, swap_space=4, kv_cache_dtype='auto', num_gpu_blocks_override=None, enable_prefix_caching=True, prefix_caching_hash_algo='builtin', cpu_offload_gb=0, calculate_kv_scales=False, tokenizer_pool_size=0, tokenizer_pool_type='ray', tokenizer_pool_extra_config={}, limit_mm_per_prompt={}, mm_processor_kwargs=None, disable_mm_preprocessor_cache=False, enable_lora=None, enable_lora_bias=False, max_loras=1, max_lora_rank=16, lora_extra_vocab_size=256, lora_dtype='auto', long_lora_scaling_factors=None, max_cpu_loras=None, fully_sharded_loras=False, enable_prompt_adapter=None, max_prompt_adapters=1, max_prompt_adapter_token=0, device='auto', speculative_config=None, show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, max_num_batched_tokens=32768, max_num_seqs=64, max_num_partial_prefills=1, max_long_partial_prefills=1, cuda_graph_sizes=[512], long_prefill_token_threshold=0, num_lookahead_slots=0, scheduler_delay_factor=0.6, preemption_mode=None, num_scheduler_steps=1, multi_step_stream_outputs=True, scheduling_policy='fcfs', enable_chunked_prefill=True, disable_chunked_mm_input=False, scheduler_cls='vllm.core.scheduler.Scheduler', kv_transfer_config=None, kv_events_config=None, compilation_config={"inductor_compile_config": {"enable_auto_functionalized_v2": false}}, additional_config={}, use_v2_block_manager=True, disable_log_stats=False, disable_log_requests=True)
+WARNING 03-04 11:31:18 [config.py:454] The global random seed is set to 0. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.
+INFO 03-04 11:31:18 [config.py:520] Overriding HF config with {'rope_scaling': {'rope_type': 'linear', 'factor': 1.0}}
+INFO 03-04 11:31:36 [config.py:793] This model supports multiple tasks: {'generate', 'reward', 'classify', 'score', 'embed'}. Defaulting to 'generate'.
+WARNING 03-04 11:31:36 [arg_utils.py:1583] --disable-async-output-proc is not supported by the V1 Engine. Falling back to V0. We recommend to remove --disable-async-output-proc from your config in favor of the V1 Engine.
+INFO 03-04 11:31:36 [config.py:793] This model supports multiple tasks: {'generate', 'score', 'embed', 'reward', 'classify'}. Defaulting to 'generate'.
+WARNING 03-04 11:31:36 [arg_utils.py:1583] --disable-async-output-proc is not supported by the V1 Engine. Falling back to V0. We recommend to remove --disable-async-output-proc from your config in favor of the V1 Engine.
+INFO 03-04 11:31:36 [config.py:1875] Defaulting to use mp for distributed inference
+INFO 03-04 11:31:36 [config.py:2118] Chunked prefill is enabled with max_num_batched_tokens=32768.
+INFO 03-04 11:31:36 [config.py:1875] Defaulting to use mp for distributed inference
+INFO 03-04 11:31:36 [config.py:2118] Chunked prefill is enabled with max_num_batched_tokens=32768.
+INFO 03-04 11:31:36 [llm_engine.py:230] Initializing a V0 LLM engine (v0.9.0) with config: model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', speculative_config=None, tokenizer='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config={}, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=0, served_model_name=/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=True, chunked_prefill_enabled=True, use_async_output_proc=False, pooler_config=None, compilation_config={"compile_sizes": [], "inductor_compile_config": {"enable_auto_functionalized_v2": false}, "cudagraph_capture_sizes": [], "max_capture_size": 0}, use_cached_outputs=False, 
+INFO 03-04 11:31:36 [llm_engine.py:230] Initializing a V0 LLM engine (v0.9.0) with config: model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', speculative_config=None, tokenizer='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config={}, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=0, served_model_name=/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=True, chunked_prefill_enabled=True, use_async_output_proc=False, pooler_config=None, compilation_config={"compile_sizes": [], "inductor_compile_config": {"enable_auto_functionalized_v2": false}, "cudagraph_capture_sizes": [], "max_capture_size": 0}, use_cached_outputs=False, 
+INFO 03-04 11:31:36 [config.py:793] This model supports multiple tasks: {'classify', 'embed', 'reward', 'generate', 'score'}. Defaulting to 'generate'.
+WARNING 03-04 11:31:36 [arg_utils.py:1583] --disable-async-output-proc is not supported by the V1 Engine. Falling back to V0. We recommend to remove --disable-async-output-proc from your config in favor of the V1 Engine.
+INFO 03-04 11:31:36 [config.py:1875] Defaulting to use mp for distributed inference
+INFO 03-04 11:31:36 [config.py:2118] Chunked prefill is enabled with max_num_batched_tokens=32768.
+INFO 03-04 11:31:36 [llm_engine.py:230] Initializing a V0 LLM engine (v0.9.0) with config: model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', speculative_config=None, tokenizer='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config={}, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=0, served_model_name=/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=True, chunked_prefill_enabled=True, use_async_output_proc=False, pooler_config=None, compilation_config={"compile_sizes": [], "inductor_compile_config": {"enable_auto_functionalized_v2": false}, "cudagraph_capture_sizes": [], "max_capture_size": 0}, use_cached_outputs=False, 
+WARNING 03-04 11:31:37 [multiproc_worker_utils.py:306] Reducing Torch parallelism from 32 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:37 [multiproc_worker_utils.py:225] Worker ready; awaiting tasks
+WARNING 03-04 11:31:37 [multiproc_worker_utils.py:306] Reducing Torch parallelism from 32 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+WARNING 03-04 11:31:37 [multiproc_worker_utils.py:306] Reducing Torch parallelism from 32 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:37 [multiproc_worker_utils.py:225] Worker ready; awaiting tasks
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:37 [multiproc_worker_utils.py:225] Worker ready; awaiting tasks
+INFO 03-04 11:31:38 [config.py:793] This model supports multiple tasks: {'generate', 'reward', 'embed', 'classify', 'score'}. Defaulting to 'generate'.
+WARNING 03-04 11:31:38 [arg_utils.py:1583] --disable-async-output-proc is not supported by the V1 Engine. Falling back to V0. We recommend to remove --disable-async-output-proc from your config in favor of the V1 Engine.
+INFO 03-04 11:31:38 [config.py:1875] Defaulting to use mp for distributed inference
+INFO 03-04 11:31:38 [config.py:2118] Chunked prefill is enabled with max_num_batched_tokens=32768.
+INFO 03-04 11:31:38 [llm_engine.py:230] Initializing a V0 LLM engine (v0.9.0) with config: model='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', speculative_config=None, tokenizer='/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config={}, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=0, served_model_name=/research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=True, chunked_prefill_enabled=True, use_async_output_proc=False, pooler_config=None, compilation_config={"compile_sizes": [], "inductor_compile_config": {"enable_auto_functionalized_v2": false}, "cudagraph_capture_sizes": [], "max_capture_size": 0}, use_cached_outputs=False, 
+WARNING 03-04 11:31:39 [multiproc_worker_utils.py:306] Reducing Torch parallelism from 32 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:39 [multiproc_worker_utils.py:225] Worker ready; awaiting tasks
+INFO 03-04 11:31:39 [cuda.py:292] Using Flash Attention backend.
+INFO 03-04 11:31:39 [cuda.py:292] Using Flash Attention backend.
+INFO 03-04 11:31:40 [cuda.py:292] Using Flash Attention backend.
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:40 [cuda.py:292] Using Flash Attention backend.
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:40 [cuda.py:292] Using Flash Attention backend.
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:40 [cuda.py:292] Using Flash Attention backend.
+INFO 03-04 11:31:41 [utils.py:1077] Found nccl from library libnccl.so.2
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:41 [utils.py:1077] Found nccl from library libnccl.so.2
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:41 [pynccl.py:69] vLLM is using nccl==2.26.2
+INFO 03-04 11:31:41 [pynccl.py:69] vLLM is using nccl==2.26.2
+INFO 03-04 11:31:41 [cuda.py:292] Using Flash Attention backend.
+INFO 03-04 11:31:41 [utils.py:1077] Found nccl from library libnccl.so.2
+INFO 03-04 11:31:41 [pynccl.py:69] vLLM is using nccl==2.26.2
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:41 [utils.py:1077] Found nccl from library libnccl.so.2
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:41 [pynccl.py:69] vLLM is using nccl==2.26.2
+INFO 03-04 11:31:42 [utils.py:1077] Found nccl from library libnccl.so.2
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:42 [utils.py:1077] Found nccl from library libnccl.so.2
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:42 [pynccl.py:69] vLLM is using nccl==2.26.2
+INFO 03-04 11:31:42 [pynccl.py:69] vLLM is using nccl==2.26.2
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:42 [cuda.py:292] Using Flash Attention backend.
+INFO 03-04 11:31:42 [shm_broadcast.py:250] vLLM message queue communication handle: Handle(local_reader_ranks=[1], buffer_handle=(1, 4194304, 6, 'psm_e3173e6e'), local_subscribe_addr='ipc:///tmp/706cf0a4-6bec-42bc-b124-b465863a6e57', remote_subscribe_addr=None, remote_addr_ipv6=False)
+INFO 03-04 11:31:42 [shm_broadcast.py:250] vLLM message queue communication handle: Handle(local_reader_ranks=[1], buffer_handle=(1, 4194304, 6, 'psm_92d47e33'), local_subscribe_addr='ipc:///tmp/ae1f45c3-6017-4166-88f5-59ab183cb33b', remote_subscribe_addr=None, remote_addr_ipv6=False)
+INFO 03-04 11:31:42 [parallel_state.py:1064] rank 0 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 0, EP rank 0
+INFO 03-04 11:31:42 [parallel_state.py:1064] rank 0 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 0, EP rank 0
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:42 [parallel_state.py:1064] rank 1 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 1, EP rank 1
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:42 [parallel_state.py:1064] rank 1 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 1, EP rank 1
+INFO 03-04 11:31:42 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:42 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+INFO 03-04 11:31:42 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:42 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+INFO 03-04 11:31:42 [shm_broadcast.py:250] vLLM message queue communication handle: Handle(local_reader_ranks=[1], buffer_handle=(1, 4194304, 6, 'psm_2563a9fb'), local_subscribe_addr='ipc:///tmp/3b9efd87-15c5-44d2-9a85-cdffea5e9c71', remote_subscribe_addr=None, remote_addr_ipv6=False)
+INFO 03-04 11:31:42 [parallel_state.py:1064] rank 0 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 0, EP rank 0
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:42 [parallel_state.py:1064] rank 1 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 1, EP rank 1
+INFO 03-04 11:31:42 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:42 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+Loading safetensors checkpoint shards:   0% Completed | 0/17 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:   0% Completed | 0/17 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:   0% Completed | 0/17 [00:00<?, ?it/s]
+INFO 03-04 11:31:43 [utils.py:1077] Found nccl from library libnccl.so.2
+INFO 03-04 11:31:43 [pynccl.py:69] vLLM is using nccl==2.26.2
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:43 [utils.py:1077] Found nccl from library libnccl.so.2
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:43 [pynccl.py:69] vLLM is using nccl==2.26.2
+INFO 03-04 11:31:43 [shm_broadcast.py:250] vLLM message queue communication handle: Handle(local_reader_ranks=[1], buffer_handle=(1, 4194304, 6, 'psm_36409767'), local_subscribe_addr='ipc:///tmp/1c55e1a5-b932-43bd-9b27-8e35476c2318', remote_subscribe_addr=None, remote_addr_ipv6=False)
+INFO 03-04 11:31:43 [parallel_state.py:1064] rank 0 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 0, EP rank 0
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:43 [parallel_state.py:1064] rank 1 in world size 2 is assigned as DP rank 0, PP rank 0, TP rank 1, EP rank 1
+INFO 03-04 11:31:43 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:43 [model_runner.py:1170] Starting to load model /research/d1/gds/ytyang/kwchen/hf_models/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137...
+Loading safetensors checkpoint shards:   6% Completed | 1/17 [00:00<00:11,  1.42it/s]
+Loading safetensors checkpoint shards:   0% Completed | 0/17 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:   6% Completed | 1/17 [00:00<00:12,  1.29it/s]
+Loading safetensors checkpoint shards:   6% Completed | 1/17 [00:00<00:12,  1.31it/s]
+Loading safetensors checkpoint shards:   6% Completed | 1/17 [00:00<00:12,  1.27it/s]
+Loading safetensors checkpoint shards:  12% Completed | 2/17 [00:01<00:11,  1.29it/s]
+Loading safetensors checkpoint shards:  12% Completed | 2/17 [00:01<00:12,  1.16it/s]
+Loading safetensors checkpoint shards:  12% Completed | 2/17 [00:01<00:12,  1.17it/s]
+Loading safetensors checkpoint shards:  12% Completed | 2/17 [00:01<00:12,  1.21it/s]
+Loading safetensors checkpoint shards:  18% Completed | 3/17 [00:02<00:11,  1.23it/s]
+Loading safetensors checkpoint shards:  18% Completed | 3/17 [00:02<00:12,  1.14it/s]
+Loading safetensors checkpoint shards:  18% Completed | 3/17 [00:02<00:12,  1.15it/s]
+Loading safetensors checkpoint shards:  24% Completed | 4/17 [00:03<00:10,  1.30it/s]
+Loading safetensors checkpoint shards:  18% Completed | 3/17 [00:02<00:11,  1.20it/s]
+Loading safetensors checkpoint shards:  24% Completed | 4/17 [00:03<00:10,  1.23it/s]
+Loading safetensors checkpoint shards:  24% Completed | 4/17 [00:03<00:10,  1.24it/s]
+Loading safetensors checkpoint shards:  24% Completed | 4/17 [00:03<00:09,  1.31it/s]
+Loading safetensors checkpoint shards:  29% Completed | 5/17 [00:03<00:09,  1.24it/s]
+Loading safetensors checkpoint shards:  29% Completed | 5/17 [00:04<00:10,  1.19it/s]
+Loading safetensors checkpoint shards:  29% Completed | 5/17 [00:04<00:10,  1.19it/s]
+Loading safetensors checkpoint shards:  29% Completed | 5/17 [00:03<00:09,  1.28it/s]
+Loading safetensors checkpoint shards:  35% Completed | 6/17 [00:04<00:09,  1.21it/s]
+Loading safetensors checkpoint shards:  35% Completed | 6/17 [00:05<00:09,  1.19it/s]
+Loading safetensors checkpoint shards:  35% Completed | 6/17 [00:05<00:09,  1.19it/s]
+Loading safetensors checkpoint shards:  35% Completed | 6/17 [00:04<00:08,  1.25it/s]
+Loading safetensors checkpoint shards:  41% Completed | 7/17 [00:05<00:08,  1.20it/s]
+Loading safetensors checkpoint shards:  41% Completed | 7/17 [00:05<00:08,  1.20it/s]
+Loading safetensors checkpoint shards:  41% Completed | 7/17 [00:05<00:08,  1.20it/s]
+Loading safetensors checkpoint shards:  41% Completed | 7/17 [00:05<00:08,  1.24it/s]
+Loading safetensors checkpoint shards:  47% Completed | 8/17 [00:06<00:07,  1.22it/s]
+Loading safetensors checkpoint shards:  47% Completed | 8/17 [00:06<00:07,  1.20it/s]
+Loading safetensors checkpoint shards:  47% Completed | 8/17 [00:06<00:07,  1.20it/s]
+Loading safetensors checkpoint shards:  47% Completed | 8/17 [00:06<00:07,  1.24it/s]
+Loading safetensors checkpoint shards:  53% Completed | 9/17 [00:07<00:06,  1.21it/s]
+Loading safetensors checkpoint shards:  53% Completed | 9/17 [00:07<00:06,  1.19it/s]
+Loading safetensors checkpoint shards:  53% Completed | 9/17 [00:07<00:06,  1.19it/s]
+Loading safetensors checkpoint shards:  53% Completed | 9/17 [00:07<00:06,  1.24it/s]
+Loading safetensors checkpoint shards:  59% Completed | 10/17 [00:08<00:05,  1.22it/s]
+Loading safetensors checkpoint shards:  59% Completed | 10/17 [00:08<00:05,  1.19it/s]
+Loading safetensors checkpoint shards:  59% Completed | 10/17 [00:08<00:05,  1.19it/s]
+Loading safetensors checkpoint shards:  59% Completed | 10/17 [00:08<00:05,  1.23it/s]
+Loading safetensors checkpoint shards:  65% Completed | 11/17 [00:08<00:04,  1.21it/s]
+Loading safetensors checkpoint shards:  65% Completed | 11/17 [00:09<00:04,  1.21it/s]
+Loading safetensors checkpoint shards:  65% Completed | 11/17 [00:09<00:04,  1.20it/s]
+Loading safetensors checkpoint shards:  65% Completed | 11/17 [00:08<00:04,  1.23it/s]
+Loading safetensors checkpoint shards:  71% Completed | 12/17 [00:09<00:04,  1.21it/s]
+Loading safetensors checkpoint shards:  71% Completed | 12/17 [00:09<00:04,  1.22it/s]
+Loading safetensors checkpoint shards:  71% Completed | 12/17 [00:09<00:04,  1.21it/s]
+Loading safetensors checkpoint shards:  71% Completed | 12/17 [00:09<00:04,  1.22it/s]
+Loading safetensors checkpoint shards:  76% Completed | 13/17 [00:10<00:03,  1.21it/s]
+Loading safetensors checkpoint shards:  76% Completed | 13/17 [00:10<00:03,  1.22it/s]
+Loading safetensors checkpoint shards:  76% Completed | 13/17 [00:10<00:03,  1.21it/s]
+Loading safetensors checkpoint shards:  76% Completed | 13/17 [00:10<00:03,  1.22it/s]
+Loading safetensors checkpoint shards:  82% Completed | 14/17 [00:13<00:04,  1.36s/it]
+Loading safetensors checkpoint shards:  82% Completed | 14/17 [00:13<00:03,  1.29s/it]
+Loading safetensors checkpoint shards:  82% Completed | 14/17 [00:13<00:03,  1.30s/it]
+Loading safetensors checkpoint shards:  82% Completed | 14/17 [00:12<00:03,  1.18s/it]
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:56 [default_loader.py:280] Loading weights took 13.35 seconds
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:31:56 [model_runner.py:1202] Model loading took 30.5855 GiB and 14.106460 seconds
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:56 [default_loader.py:280] Loading weights took 13.73 seconds
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:57 [default_loader.py:280] Loading weights took 13.92 seconds
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:31:57 [model_runner.py:1202] Model loading took 30.5855 GiB and 14.435253 seconds
+Loading safetensors checkpoint shards:  88% Completed | 15/17 [00:14<00:02,  1.19s/it]
+Loading safetensors checkpoint shards:  88% Completed | 15/17 [00:14<00:02,  1.15s/it]
+Loading safetensors checkpoint shards:  88% Completed | 15/17 [00:14<00:02,  1.15s/it]
+Loading safetensors checkpoint shards:  88% Completed | 15/17 [00:13<00:02,  1.08s/it]
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:31:57 [model_runner.py:1202] Model loading took 30.5855 GiB and 14.375952 seconds
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:57 [default_loader.py:280] Loading weights took 13.80 seconds
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:31:57 [model_runner.py:1202] Model loading took 30.5855 GiB and 14.066495 seconds
+Loading safetensors checkpoint shards:  94% Completed | 16/17 [00:14<00:01,  1.08s/it]
+Loading safetensors checkpoint shards:  94% Completed | 16/17 [00:14<00:01,  1.05s/it]
+Loading safetensors checkpoint shards:  94% Completed | 16/17 [00:14<00:00,  1.00it/s]
+Loading safetensors checkpoint shards:  94% Completed | 16/17 [00:14<00:01,  1.06s/it]
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.01s/it]
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.09it/s]
+
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.01it/s]
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.01it/s]
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.05it/s]
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.08it/s]
+
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.08it/s]
+
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:15<00:00,  1.13it/s]
+
+INFO 03-04 11:31:58 [default_loader.py:280] Loading weights took 15.77 seconds
+INFO 03-04 11:31:58 [default_loader.py:280] Loading weights took 15.77 seconds
+INFO 03-04 11:31:58 [default_loader.py:280] Loading weights took 15.08 seconds
+INFO 03-04 11:31:58 [default_loader.py:280] Loading weights took 15.76 seconds
+INFO 03-04 11:31:59 [model_runner.py:1202] Model loading took 30.5855 GiB and 16.483697 seconds
+INFO 03-04 11:31:59 [model_runner.py:1202] Model loading took 30.5855 GiB and 16.507092 seconds
+INFO 03-04 11:31:59 [model_runner.py:1202] Model loading took 30.5855 GiB and 16.227913 seconds
+INFO 03-04 11:31:59 [model_runner.py:1202] Model loading took 30.5855 GiB and 15.334840 seconds
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 17.80 seconds
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+[1;36m(VllmWorkerProcess pid=3239723)[0;0m INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 17.93 seconds
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+[1;36m(VllmWorkerProcess pid=3239585)[0;0m INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 17.89 seconds
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+[1;36m(VllmWorkerProcess pid=3239573)[0;0m INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 17.92 seconds
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+[1;36m(VllmWorkerProcess pid=3239556)[0;0m INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 17.95 seconds
+INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 17.99 seconds
+INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 18.03 seconds
+INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+INFO 03-04 11:32:17 [worker.py:291] Memory profiling takes 18.03 seconds
+INFO 03-04 11:32:17 [worker.py:291] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+INFO 03-04 11:32:17 [worker.py:291] model weights take 30.59GiB; non_torch_memory takes 0.97GiB; PyTorch activation peak memory takes 3.91GiB; the rest of the memory reserved for KV Cache is 35.85GiB.
+INFO 03-04 11:32:17 [executor_base.py:112] # cuda blocks: 4588, # CPU blocks: 512
+INFO 03-04 11:32:17 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 7.17x
+INFO 03-04 11:32:17 [executor_base.py:112] # cuda blocks: 4588, # CPU blocks: 512
+INFO 03-04 11:32:17 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 7.17x
+INFO 03-04 11:32:17 [executor_base.py:112] # cuda blocks: 4588, # CPU blocks: 512
+INFO 03-04 11:32:17 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 7.17x
+INFO 03-04 11:32:17 [executor_base.py:112] # cuda blocks: 4588, # CPU blocks: 512
+INFO 03-04 11:32:17 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 7.17x
+INFO 03-04 11:32:19 [llm_engine.py:428] init engine (profile, create kv cache, warmup model) took 20.46 seconds
+INFO 03-04 11:32:19 [llm_engine.py:428] init engine (profile, create kv cache, warmup model) took 20.57 seconds
+INFO 03-04 11:32:19 [llm_engine.py:428] init engine (profile, create kv cache, warmup model) took 20.54 seconds
+INFO 03-04 11:32:19 [llm_engine.py:428] init engine (profile, create kv cache, warmup model) took 20.60 seconds
+INFO:     Started server process [3234723]
+INFO:     Started server process [3234725]
+INFO:     Waiting for application startup.
+INFO:     Waiting for application startup.
+INFO:     Started server process [3234724]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Application startup complete.
+INFO:     Application startup complete.
+INFO:     Started server process [3234726]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
+[rank0]:[W304 11:32:21.908601807 ProcessGroupNCCL.cpp:1476] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+Terminated
+finish client start!
+Terminated
+Killing vLLM API server processes...
+Killing vLLM pid: 3234723
+Killing vLLM pid: 3234724
+Killing vLLM pid: 3234726
+Killing vLLM pid: 3239556
+Killing vLLM pid: 3239573
+Killing vLLM pid: 3239585
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+/research/d1/gds/ytyang/kwchen/hetero_rollout/hetero_env/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+run_server.sh: line 83: 3234724 Killed                  python -m clients.api_server --model ${model_path} --disable-log-requests --max-num-batched-tokens 32768 --max-num-seqs ${max_num_seqs} --scheduler-delay-factor ${scheduler_delay_factor} --port ${int_port} --tensor-parallel-size ${tp_size} --pipeline-parallel-size ${pp_size} --block-size ${block_size} --gpu-memory-utilization 0.9 --trust-remote-code --enforce-eager --disable-async-output-proc --rope-scaling '{"rope_type": "linear", "factor": 1.0}' $additional_options
+run_server.sh: line 83: 3234726 Killed                  python -m clients.api_server --model ${model_path} --disable-log-requests --max-num-batched-tokens 32768 --max-num-seqs ${max_num_seqs} --scheduler-delay-factor ${scheduler_delay_factor} --port ${int_port} --tensor-parallel-size ${tp_size} --pipeline-parallel-size ${pp_size} --block-size ${block_size} --gpu-memory-utilization 0.9 --trust-remote-code --enforce-eager --disable-async-output-proc --rope-scaling '{"rope_type": "linear", "factor": 1.0}' $additional_options
+run_server.sh: line 83: 3234723 Killed                  python -m clients.api_server --model ${model_path} --disable-log-requests --max-num-batched-tokens 32768 --max-num-seqs ${max_num_seqs} --scheduler-delay-factor ${scheduler_delay_factor} --port ${int_port} --tensor-parallel-size ${tp_size} --pipeline-parallel-size ${pp_size} --block-size ${block_size} --gpu-memory-utilization 0.9 --trust-remote-code --enforce-eager --disable-async-output-proc --rope-scaling '{"rope_type": "linear", "factor": 1.0}' $additional_options
+Done.

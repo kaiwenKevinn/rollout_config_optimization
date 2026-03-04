@@ -13,6 +13,7 @@ enable_chunked_prefill=$9
 enable_prefix_caching=${10}
 disable_custom_all_reduce=${11}
 use_v2_block_manager=${12}
+enable_expert_parallel=${13:-False}
 int_port=$((port + 0))
 additional_options=""
 
@@ -32,6 +33,10 @@ if [ "${use_v2_block_manager}" == "True" ]; then
     additional_options+="--use-v2-block-manager "
 fi
 
+if [ "${enable_expert_parallel}" == "True" ]; then
+    additional_options+="--enable-expert-parallel "
+fi
+
 echo run_server.sh
 echo tp_size ${tp_size}
 echo pp_size ${pp_size}
@@ -39,6 +44,7 @@ echo enable_chunked_prefill ${enable_chunked_prefill}
 echo enable_prefix_caching ${enable_prefix_caching}
 echo disable_custom_all_reduce ${disable_custom_all_reduce}
 echo use_v2_block_manager ${use_v2_block_manager}
+echo enable_expert_parallel ${enable_expert_parallel}
  # --max-num-batched-tokens 32768 \
 
 echo  python -m clients.api_server \
