@@ -1,6 +1,9 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,5"
+
 import torch
 import argparse
-import os
+import random
 import logging
 import tqdm
 import traceback
@@ -9,7 +12,7 @@ import time
 import math
 
 from typing import Union, Tuple
-from utils import gen_res_dir_path, check_port, get_ref_config, read_historical_data
+from utils import gen_res_dir_path, check_port, get_ref_config, read_historical_data, find_available_base_port
 import pandas as pd
 import numpy as np
 from hebo.design_space.design_space import DesignSpace
@@ -76,15 +79,24 @@ def add_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "--pressure_test",
         action='store_true')
+
+    parser.add_argument(
+        "--tune_params",
+        type=str,
+        default="tp,pp,block_size",
+        help="调优的参数类型，逗号分隔，如 tp,pp,block_size；其他参数使用默认值")
     return parser
 
 
-def run_benchmark_pipeline(combination: Tuple, gpu_nums, args):
+def run_benchmark_pipeline(combination: Tuple, gpu_nums, args, base_port: int = None):
     tp_size = combination[0]
     pp_size = combination[1]
     world_size = tp_size * pp_size
     num_replicas = int(gpu_nums / world_size)
-    ports = ",".join([str(8000 + i) for i in range(num_replicas)])
+    # 优先使用传入的 base_port；否则自动寻找空闲端口
+    if base_port is None:
+        base_port = find_available_base_port(num_replicas)
+    ports = ",".join([str(base_port + i) for i in range(num_replicas)])
     gpus = [str(i) for i in range(gpu_nums)]
     grouped_gpus = [','.join(gpus[i:i + world_size]) for i in range(0, gpu_nums, world_size)]
     grouped_gpus_string = '#'.join(grouped_gpus)
@@ -106,50 +118,57 @@ def run_benchmark_pipeline(combination: Tuple, gpu_nums, args):
             logging.error(f'init error: {traceback.format_exc()}')
 
 
-def obj(rec: pd.DataFrame, gpu_nums, res_dir_path, args, min_world_size: int = 1) -> Union[None, np.ndarray]:
-    # 固定为 True：enable_chunked_prefill, enable_prefix_caching, disable_custom_all_reduce, use_v2_block_manager
-    combination = (
-        int(rec['tp'].tolist()[0]),
-        int(rec['pipeline_parallel_size'].tolist()[0]),
-        int(rec['max_num_seqs'].tolist()[0]),
-        int(rec['max_num_batched_tokens'].tolist()[0]),
-        int(rec['block_size'].tolist()[0]),
-        float(rec['scheduler_delay_factor'].tolist()[0] / 10),
+def _rec_to_combination(rec: pd.DataFrame, max_sequence_length: int = 4096) -> Tuple:
+    """将 rec（可能只含部分调优参数）转为完整 combination，未调优参数用默认值"""
+    def get(col, default):
+        if col in rec.columns and len(rec[col]) > 0:
+            return rec[col].tolist()[0]
+        return default
+    mnbt_default = max(32768, max_sequence_length * 2)
+    sdf_raw = get('scheduler_delay_factor', 0)  # step_int: 0,2,...,20 -> 除以10得 0.0,0.2,...,2.0
+    sdf_val = float(sdf_raw) / 10.0
+    return (
+        int(get('tp', 2)),
+        int(get('pipeline_parallel_size', 1)),
+        int(get('max_num_seqs', 64)),
+        int(get('max_num_batched_tokens', mnbt_default)),
+        int(get('block_size', 16)),
+        sdf_val,
         "True",   # enable_chunked_prefill (固定)
         "True",   # enable_prefix_caching (固定)
         "True",   # disable_custom_all_reduce (固定)
         "True",   # use_v2_block_manager (固定)
-        str(rec['enable_expert_parallel'].tolist()[0]),  # enable_expert_parallel (可调优)
+        str(get('enable_expert_parallel', False)),
     )
 
-    # clear processes and ports sequentially
+
+def obj(rec: pd.DataFrame, gpu_nums, res_dir_path, args, min_world_size: int = 1) -> Union[None, np.ndarray]:
+    # 固定为 True：enable_chunked_prefill, enable_prefix_caching, disable_custom_all_reduce, use_v2_block_manager
+    try:
+        max_seq_len = get_ref_config('max_sequence_length')
+    except Exception:
+        max_seq_len = 4096
+    combination = _rec_to_combination(rec, max_seq_len)
+
+    # 清理残留进程
     try:
         os.system(f'pgrep -f "clients.api_server" | xargs kill -9 2>/dev/null || true')
     except Exception as e:
         print("Kill Whole Process Error:", e)
-    # 增加等待时间，确保 benchmark_pipeline 杀进程后端口完全释放（含 TIME_WAIT）
-    time.sleep(15)
-    # check the ports in the last round is cleared. If not, close them
-    ports = ",".join([str(8000 + i) for i in range(int(gpu_nums / min_world_size))])
-    for port_str in ports.split(','):
-        port_num = int(port_str)
-        for retry in range(5):
-            if check_port(port_num):
-                logging.info(f'port {port_num} is not cleared (retry {retry + 1}/5). Closing it!!!')
-                try:
-                    os.system(f"lsof -t -i:{port_num} | xargs kill -9 2>/dev/null || true")
-                except Exception as e:
-                    print("Kill Port Process Error:", e)
-                time.sleep(5)
-            else:
-                break
-        if check_port(port_num):
-            raise RuntimeError(
-                f"Port {port_num} is not cleared after retries. "
-                "Previous vLLM process may still be holding it. Try: pkill -9 -f clients.api_server"
-            )
     time.sleep(5)
-    run_benchmark_pipeline(combination, gpu_nums, args)
+
+    # 寻找空闲端口（若 8000 被占用则自动选用其他端口）
+    num_replicas = int(gpu_nums / min_world_size)
+    try:
+        base_port = find_available_base_port(num_replicas, start=8000, end=30000)
+    except RuntimeError:
+        os.system(f'pgrep -f "clients.api_server" | xargs kill -9 2>/dev/null || true')
+        time.sleep(10)
+        base_port = find_available_base_port(num_replicas, start=8000, end=30000)
+    print(f'Using base_port={base_port} (ports {base_port}-{base_port + num_replicas - 1})')
+    logging.info(f'Using base_port={base_port} for benchmark')
+    time.sleep(2)
+    run_benchmark_pipeline(combination, gpu_nums, args, base_port=base_port)
 
     # 取最新的 vllm 结果文件（benchmark 失败时可能无新文件或取到旧配置）
     vllm_files = []
@@ -218,21 +237,24 @@ def read_rec_history(rec_history_file_path):
         return 0, []
 
 
-def obtain_random_forest_train_set(rec_history):
+def obtain_random_forest_train_set(rec_history, param_names=None):
+    """param_names: 调优参数列名，用于构建特征；不传则使用全部参数（兼容旧格式）"""
+    default_names = ['tp', 'pipeline_parallel_size', 'max_num_seqs', 'max_num_batched_tokens',
+                    'block_size', 'scheduler_delay_factor', 'enable_expert_parallel']
+    default_vals = [2, 1, 64, 32768, 16, 0, 0]
+    name_to_idx = {k: i for i, k in enumerate(default_names)}
     x = []
     y = []
     for data_item in rec_history:
-        # 可调优参数：tp, pipeline_parallel_size, max_num_seqs, max_num_batched_tokens, block_size, scheduler_delay_factor, enable_expert_parallel
         rec0 = data_item['rec'][0]
-        x.append([
-            rec0['tp'],
-            rec0.get('pipeline_parallel_size', 1),
-            rec0['max_num_seqs'],
-            rec0['max_num_batched_tokens'],
-            rec0['block_size'],
-            rec0['scheduler_delay_factor'],
-            1 if rec0.get('enable_expert_parallel', False) else 0,
-        ])
+        names = param_names if param_names else default_names
+        row = []
+        for n in names:
+            if n == 'enable_expert_parallel':
+                row.append(1 if rec0.get(n, False) else 0)
+            else:
+                row.append(rec0.get(n, default_vals[name_to_idx.get(n, 0)]))
+        x.append(row)
         y.append(0 if data_item['obj'] is None else 1)
     return {'train_x': x, 'train_y': y}
 
@@ -266,6 +288,26 @@ def compute_delta_and_continuous_right(rec_history):
     return delta, continuous_right
 
 
+def _ensure_ports_cleared(gpu_nums: int, min_world_size: int, max_retries: int = 8) -> None:
+    """启动前确保端口已释放，避免上一轮残留进程导致 RuntimeError"""
+    num_ports = max(2, int(gpu_nums / min_world_size))
+    ports = [8000 + i for i in range(num_ports)]
+    for attempt in range(max_retries):
+        os.system('pgrep -f "clients.api_server" | xargs kill -9 2>/dev/null || true')
+        time.sleep(5)
+        busy = []
+        for p in ports:
+            if check_port(p):
+                busy.append(p)
+                os.system(f'lsof -t -i:{p} | xargs kill -9 2>/dev/null || true')
+        if not busy:
+            return
+        print(f'Ports {busy} still busy (attempt {attempt + 1}/{max_retries}), waiting...')
+        logging.info(f'Ports {busy} still busy, retrying...')
+        time.sleep(10)
+    logging.warning('Some ports may still be in use; continuing anyway.')
+
+
 def main(args):
     print(f'Input Tuning Arguments: {args}')
     gpu_nums = torch.cuda.device_count()
@@ -282,27 +324,38 @@ def main(args):
 
         logging.info(f"New BO loop of experiment {e} begins!!!")
 
+        min_world_size = get_ref_config('min_world_size')
+        _ensure_ports_cleared(gpu_nums, min_world_size)
+
         # 1. observe historical data
         xx, yy = read_historical_data(res_dir_path)
 
         # 2. DesignSpace
-        min_world_size = get_ref_config('min_world_size')  # world_size = tp * pp
         max_sequence_length = get_ref_config('max_sequence_length')
 
         logging.info(f"Min World Size: {min_world_size}, "
                      f"Max World Size: {gpu_nums}"
                     )
         # 固定为 True 的配置：enable_chunked_prefill, enable_prefix_caching, disable_custom_all_reduce, use_v2_block_manager
-        para_dict = [
-                    {"name": "tp", "type": "int_exponent", "lb": max(min_world_size, 2), "ub": gpu_nums, "base": 2},
-                    {"name": "pipeline_parallel_size", "type": "int_exponent", "lb": 1, "ub": gpu_nums, "base": 2},
-                    {"name": "max_num_seqs", "type": "int_exponent", "lb": 64, "ub": 8192, "base": 2},     # 8192 for 8卡单实例调优, 2048 for 4卡单实例调优 或 多实例调优
-                     {"name": "max_num_batched_tokens", "type": "pow_int",  # "ub": int(2 ** (8 + gpu_nums))
-                      "lb": 64, 'ub': max(32768, max_sequence_length * 2), "base": 2},
-                     {"name": "block_size", "type": "int_exponent", "lb": 16, "ub": 64, "base": 2},
-                     {"name": "scheduler_delay_factor", 'type': "step_int", "lb": 0, "ub": 20, "step": 2},
-                    {"name": "enable_expert_parallel", "type": "bool"},
-                    ]
+        # 根据 tune_params 决定哪些参数参与调优
+        tune_set = set(p.strip() for p in (args.tune_params or "tp,pp,block_size").split(",") if p.strip())
+        param_defs = {
+            "tp": {"name": "tp", "type": "int_exponent", "lb": max(min_world_size, 2), "ub": gpu_nums, "base": 2},
+            "pipeline_parallel_size": {"name": "pipeline_parallel_size", "type": "int_exponent", "lb": 1, "ub": gpu_nums, "base": 2},
+            "max_num_seqs": {"name": "max_num_seqs", "type": "int_exponent", "lb": 64, "ub": 8192, "base": 2},
+            "max_num_batched_tokens": {"name": "max_num_batched_tokens", "type": "pow_int", "lb": 64, "ub": max(32768, max_sequence_length * 2), "base": 2},
+            "block_size": {"name": "block_size", "type": "int_exponent", "lb": 16, "ub": 64, "base": 2},
+            "scheduler_delay_factor": {"name": "scheduler_delay_factor", "type": "step_int", "lb": 0, "ub": 20, "step": 2},
+            "enable_expert_parallel": {"name": "enable_expert_parallel", "type": "bool"},
+        }
+        # pp 与 pipeline_parallel_size 视为同一参数
+        if "pp" in tune_set:
+            tune_set.add("pipeline_parallel_size")
+        para_dict = []
+        for k in ["tp", "pipeline_parallel_size", "max_num_seqs", "max_num_batched_tokens", "block_size", "scheduler_delay_factor", "enable_expert_parallel"]:
+            if k in tune_set:
+                para_dict.append(param_defs[k])
+        logging.info(f"Tune params: {tune_set}, design space: {[p['name'] for p in para_dict]}")
 
         space = DesignSpace().parse(para_dict)
 
@@ -360,7 +413,9 @@ def main(args):
         if len(xx) > 0 and len(yy) > 0:
             print(f'Tuning History Configurations: {xx}')
             print(f'Tuning History Objectives: {yy}')
-            explored_x = pd.DataFrame.from_dict(xx)
+            explored_x = pd.DataFrame(xx)
+            space_cols = [p['name'] for p in para_dict]
+            explored_x = explored_x[[c for c in space_cols if c in explored_x.columns]]
             explored_y = np.array(yy)
             opt.observe(explored_x, explored_y)
 
@@ -369,7 +424,8 @@ def main(args):
         rec_history_file_path = os.path.join(res_dir_path, 'rec_history.json')
         failed_num, rec_history_list = read_rec_history(rec_history_file_path)
 
-        train_set = obtain_random_forest_train_set(rec_history_list)
+        space_param_names = [p['name'] for p in para_dict]
+        train_set = obtain_random_forest_train_set(rec_history_list, param_names=space_param_names)
         random_forest = random_forest_regressor(train_set)
         delta, continuous_right = compute_delta_and_continuous_right(rec_history_list)
         i = failed_num + succeed_num  
@@ -413,7 +469,7 @@ def main(args):
                 'run_time': run_time
             }
             rec_history_list.append(rec_history)
-            random_forest = random_forest_regressor(obtain_random_forest_train_set(rec_history_list))
+            random_forest = random_forest_regressor(obtain_random_forest_train_set(rec_history_list, param_names=space_param_names))
 
             with open(rec_history_file_path, 'w') as fp:
                 json.dump(rec_history_list, fp)

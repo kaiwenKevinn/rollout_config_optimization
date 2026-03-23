@@ -7,6 +7,21 @@ request_num=$6
 gpu_num=$7
 gpu_type=$8
 
+# 启动前清理残留的 vLLM 进程，避免端口占用导致 RuntimeError
+echo "Pre-cleaning: killing any stale clients.api_server processes..."
+pkill -9 -f "clients.api_server" 2>/dev/null || true
+sleep 5
+# 若 8000 等端口仍被占用（如 TIME_WAIT），多等一会
+for port in 8000 8001 8010 8011 8020 8021; do
+    if lsof -i:${port} 2>/dev/null | grep -q LISTEN; then
+        echo "Port ${port} still in use, force killing..."
+        lsof -t -i:${port} 2>/dev/null | xargs kill -9 2>/dev/null || true
+        sleep 3
+    fi
+done
+sleep 10
+echo "Pre-clean done."
+
 # install requirements
 # pip install -r requirements.txt
 export VLLM_TORCH_COMPILE_LEVEL=NONE
@@ -34,6 +49,9 @@ echo gpu_num=${gpu_num}
 echo gpu_type=${gpu_type}
 
 
+# 调优参数类型：仅调优 tp, pp, block_size（其他参数使用默认值）
+TUNE_PARAMS="tp,pp,block_size"
+
 python bo_scoot.py --model_path ${model_path}\
                     --dataset_path ${dataset_path}\
                     --dataset_name ${dataset_name}\
@@ -43,4 +61,5 @@ python bo_scoot.py --model_path ${model_path}\
                     --bo_loop 30\
                     --exp_num 1\
                     --num_requests ${request_num}\
-                    --num_obj 1
+                    --num_obj 1\
+                    --tune_params ${TUNE_PARAMS}

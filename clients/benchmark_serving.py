@@ -1,9 +1,12 @@
 # From vllm benchmarks
 import argparse
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,5"
+
 import asyncio
 import json
 import logging
-import os
 import random
 import time
 import warnings

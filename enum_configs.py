@@ -15,9 +15,13 @@
 """
 
 import re
-import torch
-import argparse
 import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,5"
+import torch
+
+import argparse
+
 import json
 import logging
 import itertools
@@ -40,7 +44,6 @@ os.makedirs(LOG_DIR, exist_ok=True)
 os.makedirs(RAW_DIR, exist_ok=True)
 os.makedirs(ENUM_DIR, exist_ok=True)
 
-
 def add_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument("--model_path", type=str, required=True)
     parser.add_argument("--dataset_path", type=str, required=True)
@@ -53,6 +56,8 @@ def add_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument("--pressure_test", action='store_true')
     parser.add_argument("--output_dir", type=str, default=None,
                         help="结果输出目录，默认 tune_res/enum_results/<timestamp>")
+    parser.add_argument("--resume", action='store_true',
+                        help="断点续测：若 output_dir 已有 enum_results.json/csv，跳过已完成的配置")
     # 枚举模式
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--config_file", type=str,
@@ -61,6 +66,8 @@ def add_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
                        help="根据设计空间自动枚举所有有效配置")
     parser.add_argument("--max_configs", type=int, default=None,
                         help="auto_enum 模式下最大配置数量，超出则随机抽样")
+    parser.add_argument("--tune_params", type=str, default="tp,pp,block_size",
+                        help="auto_enum 模式下调优的参数类型，逗号分隔，如 tp,pp,block_size；其他参数使用默认值")
     return parser
 
 
@@ -81,6 +88,28 @@ def config_to_combination(cfg: Dict) -> Tuple:
     )
 
 
+def _save_results(results: List[Dict], output_dir: str) -> None:
+    """即时保存结果，支持断点续测"""
+    json_path = os.path.join(output_dir, 'enum_results.json')
+    csv_path = os.path.join(output_dir, 'enum_results.csv')
+    try:
+        with open(json_path, 'w') as f:
+            json.dump(results, f, indent=2, default=str)
+        if results:
+            pd.DataFrame(results).to_csv(csv_path, index=False)
+    except Exception as e:
+        logging.warning(f"保存结果失败: {e}")
+
+
+def config_fingerprint(cfg: Dict, exclude_expert_parallel: bool = True) -> tuple:
+    """生成配置的唯一指纹，用于判断是否已完成。
+    默认排除 enable_expert_parallel，因 vllm 结果可能与其实际传入值不一致，导致断点续测无法匹配。
+    """
+    skip_keys = {'_failed'}
+    if exclude_expert_parallel:
+        skip_keys = skip_keys | {'enable_expert_parallel'}
+    return tuple(sorted((k, str(v)) for k, v in cfg.items() if k not in skip_keys))
+    
 def config_to_rec(cfg: Dict) -> pd.DataFrame:
     """将配置 dict 转为 obj() 所需的 DataFrame"""
     return pd.DataFrame([{
@@ -105,10 +134,21 @@ def load_configs_from_file(path: str) -> List[Dict]:
 
 
 def generate_enum_configs(gpu_nums: int, max_sequence_length: int, min_world_size: int,
-                         max_configs: Optional[int] = None) -> List[Dict]:
-    """根据设计空间自动生成枚举配置"""
+                         max_configs: Optional[int] = None,
+                         tune_params: Optional[List[str]] = None) -> List[Dict]:
+    """根据设计空间自动生成枚举配置。
+
+    tune_params: 要调优的参数列表，如 ['tp', 'pp', 'block_size']；其余参数使用默认值。
+    """
     import numpy as np
     from hebo.optimizers.util import ensure_hard_constr
+
+    tune_set = set((tune_params or ['tp', 'pp', 'block_size']))
+    # 默认值（非调优参数使用）
+    mns_default = 64
+    mnbt_default = 32768
+    sdf_default = 0.0
+    ep_default = False
 
     # 与 bo_scoot 一致的参数空间取值
     tp_lb = max(min_world_size, 2)
@@ -122,9 +162,17 @@ def generate_enum_configs(gpu_nums: int, max_sequence_length: int, min_world_siz
     sdf_vals = list(range(0, 21, 2))  # 0,2,4,...,20 -> 0.0, 0.2, ..., 2.0
     expert_vals = [False, True]
 
-    # 笛卡尔积（先做粗粒度以减少组合数）
+    # 只对 tune_params 中指定的参数进行枚举
+    tp_iter = tp_vals if 'tp' in tune_set else [tp_vals[0] if tp_vals else 2]
+    pp_iter = pp_vals if 'pp' in tune_set or 'pipeline_parallel_size' in tune_set else [1]
+    mns_iter = mns_vals if 'max_num_seqs' in tune_set else [mns_default]
+    mnbt_iter = mnbt_vals if 'max_num_batched_tokens' in tune_set else [mnbt_default]
+    bs_iter = bs_vals if 'block_size' in tune_set else [bs_vals[0]]
+    sdf_iter = sdf_vals if 'scheduler_delay_factor' in tune_set else [int(sdf_default * 10)]
+    expert_iter = expert_vals if 'enable_expert_parallel' in tune_set else [ep_default]
+
     all_combos = list(itertools.product(
-        tp_vals, pp_vals, mns_vals, mnbt_vals, bs_vals, sdf_vals, expert_vals
+        tp_iter, pp_iter, mns_iter, mnbt_iter, bs_iter, sdf_iter, expert_iter
     ))
 
     configs = []
@@ -140,7 +188,7 @@ def generate_enum_configs(gpu_nums: int, max_sequence_length: int, min_world_siz
             'max_num_seqs': mns,
             'max_num_batched_tokens': mnbt,
             'block_size': bs,
-            'scheduler_delay_factor': sdf / 10.0,
+            'scheduler_delay_factor': sdf / 10.0 if isinstance(sdf, int) else sdf,
             'enable_expert_parallel': ep,
         })
 
@@ -257,11 +305,84 @@ def main(args):
         max_sequence_length = 4096
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = args.output_dir or os.path.join(ENUM_DIR, f"{args.model}_{args.dataset_name}_{timestamp}")
+    if args.output_dir:
+        output_dir = args.output_dir
+    elif args.resume:
+        # 断点续测且未指定 output_dir：使用最新的同 model_dataset 目录
+        prefix = f"{args.model}_{args.dataset_name}_"
+        cands = [d for d in os.listdir(ENUM_DIR) if d.startswith(prefix)] if os.path.exists(ENUM_DIR) else []
+        cands = sorted(cands, reverse=True)
+        if cands:
+            output_dir = os.path.join(ENUM_DIR, cands[0])
+            print(f"[断点续测] 使用最新目录: {output_dir}")
+        else:
+            output_dir = os.path.join(ENUM_DIR, f"{args.model}_{args.dataset_name}_{timestamp}")
+    else:
+        output_dir = os.path.join(ENUM_DIR, f"{args.model}_{args.dataset_name}_{timestamp}")
     os.makedirs(output_dir, exist_ok=True)
     res_dir_path = os.path.join(output_dir, 'benchmark_runs')
     os.makedirs(res_dir_path, exist_ok=True)
     os.environ["RES_DIR_PATH"] = res_dir_path
+
+    # 断点续测：加载已有结果（优先 enum_results，否则从 benchmark_runs 恢复）
+    existing_results: List[Dict] = []
+    completed_fingerprints: set = set()
+    config_keys = {'tp', 'pipeline_parallel_size', 'max_num_seqs', 'max_num_batched_tokens',
+                   'block_size', 'scheduler_delay_factor', 'enable_expert_parallel'}
+    if args.resume:
+        loaded = False
+        for fname in ('enum_results.json', 'enum_results.csv'):
+            p = os.path.join(output_dir, fname)
+            if os.path.exists(p):
+                try:
+                    if fname.endswith('.json'):
+                        with open(p, 'r') as f:
+                            existing_results = json.load(f)
+                    else:
+                        existing_results = pd.read_csv(p).to_dict('records')
+                    for r in existing_results:
+                        cfg_part = {k: v for k, v in r.items() if k in config_keys}
+                        if cfg_part:
+                            completed_fingerprints.add(config_fingerprint(cfg_part))
+                    logging.info(f"Resume: 从 {p} 加载 {len(existing_results)} 条已完成结果")
+                    print(f"[断点续测] 已加载 {len(existing_results)} 条结果，将跳过 {len(completed_fingerprints)} 个已完成配置")
+                    loaded = True
+                except Exception as e:
+                    logging.warning(f"Resume 加载 {p} 失败: {e}")
+                break
+        if not loaded:
+            # 从 benchmark_runs 恢复：扫描 vllm-*.json  reconstruct 已完成配置
+            bench_dir = os.path.join(output_dir, 'benchmark_runs')
+            if os.path.isdir(bench_dir):
+                vllm_files = [f for f in os.listdir(bench_dir) if f.startswith('vllm') and f.endswith('.json')]
+                vllm_files = sorted(vllm_files, key=lambda x: os.path.getmtime(os.path.join(bench_dir, x)))
+                for vf in vllm_files:
+                    try:
+                        with open(os.path.join(bench_dir, vf), 'r') as f:
+                            act = json.load(f)
+                        cfg = {
+                            'tp': int(act.get('tp', 2)),
+                            'pipeline_parallel_size': int(act.get('pp', act.get('pipeline_parallel_size', 1))),
+                            'max_num_seqs': int(act.get('max_num_seqs', 64)),
+                            'max_num_batched_tokens': int(act.get('max_num_batched_tokens', 4096)),
+                            'block_size': int(act.get('block_size', 16)),
+                            'scheduler_delay_factor': float(act.get('scheduler_delay_factor', 0.0)),
+                            'enable_expert_parallel': act.get('enable_expert_parallel', 'False') in ('True', True),
+                        }
+                        existing_results.append({
+                            **cfg,
+                            'request_throughput': act.get('request_throughput'),
+                            'mean_ttft_ms': act.get('mean_ttft_ms'),
+                            'mean_tpot_ms': act.get('mean_tpot_ms'),
+                            'total_output_tokens': act.get('total_output_tokens'),
+                            'total_input_tokens': act.get('total_input_tokens'),
+                        })
+                        completed_fingerprints.add(config_fingerprint(cfg))
+                    except Exception as e:
+                        logging.warning(f"解析 {vf} 失败: {e}")
+                if existing_results:
+                    logging.info(f"Resume: 从 benchmark_runs 恢复 {len(existing_results)} 条结果")
+                    print(f"[断点续测] 从 benchmark_runs 恢复 {len(existing_results)} 条已完成结果，将跳过对应配置")
 
     log_file = os.path.join(LOG_DIR, f"enum_{args.model}_{args.dataset_name}_{timestamp}.log")
     logging.basicConfig(filename=log_file, level=logging.INFO)
@@ -271,8 +392,11 @@ def main(args):
         configs = load_configs_from_file(args.config_file)
         print(f"从 {args.config_file} 加载 {len(configs)} 个配置")
     else:
-        configs = generate_enum_configs(gpu_nums, max_sequence_length, min_world_size, args.max_configs)
-        print(f"自动枚举得到 {len(configs)} 个有效配置")
+        tune_params = [p.strip() for p in args.tune_params.split(',') if p.strip()]
+        configs = generate_enum_configs(
+            gpu_nums, max_sequence_length, min_world_size, args.max_configs, tune_params=tune_params
+        )
+        print(f"自动枚举得到 {len(configs)} 个有效配置 (调优参数: {tune_params})")
 
     if not configs:
         print("无有效配置，退出")
@@ -280,28 +404,43 @@ def main(args):
 
     results = []
     for i, cfg in enumerate(configs):
+        fp = config_fingerprint(cfg)
+        if args.resume and fp in completed_fingerprints:
+            # 断点续测：跳过已完成配置，从已有结果中取出
+            for ex in existing_results:
+                ex_cfg = {k: ex[k] for k in config_keys if k in ex}
+                if config_fingerprint(ex_cfg) == fp:
+                    results.append(ex)
+                    print(f"\n[{i+1}/{len(configs)}] [跳过-已完成] {cfg}")
+                    print(f"   -> throughput={ex.get('request_throughput')}, ttft={ex.get('mean_ttft_ms')}ms")
+                    break
+            else:
+                results.append({**cfg, 'request_throughput': None, 'mean_ttft_ms': None, 'mean_tpot_ms': None, '_failed': True})
+            continue
+
         print(f"\n[{i+1}/{len(configs)}] 测试配置: {cfg}")
         logging.info(f"Running config {i+1}/{len(configs)}: {cfg}")
         r = run_single_config(cfg, gpu_nums, res_dir_path, args, min_world_size)
         if r is not None:
             results.append(r)
+            if args.resume:
+                completed_fingerprints.add(fp)
             print(f"   -> throughput={r.get('request_throughput')}, ttft={r.get('mean_ttft_ms')}ms, tpot={r.get('mean_tpot_ms')}ms")
         else:
             print("   -> 失败或结果不匹配")
             results.append({**cfg, 'request_throughput': None, 'mean_ttft_ms': None, 'mean_tpot_ms': None, '_failed': True})
 
-    # 输出汇总
-    df = pd.DataFrame(results)
-    csv_path = os.path.join(output_dir, 'enum_results.csv')
-    df.to_csv(csv_path, index=False)
-    print(f"\n结果已保存至 {csv_path}")
+        # 即时保存，支持断点续测
+        _save_results(results, output_dir)
 
+    # 输出汇总（_save_results 已在循环中即时保存，此处确保最终一致）
+    _save_results(results, output_dir)
+    csv_path = os.path.join(output_dir, 'enum_results.csv')
     json_path = os.path.join(output_dir, 'enum_results.json')
-    with open(json_path, 'w') as f:
-        json.dump(results, f, indent=2, default=str)
-    print(f"JSON 已保存至 {json_path}")
+    print(f"\n结果已保存至 {csv_path} 与 {json_path}")
 
     # 按吞吐量排序打印
+    df = pd.DataFrame(results)
     valid = df[df['request_throughput'].notna()]
     if len(valid) > 0:
         valid = valid.sort_values('request_throughput', ascending=False)

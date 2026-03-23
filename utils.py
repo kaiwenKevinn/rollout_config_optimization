@@ -25,6 +25,30 @@ def check_port(port):
     return result == 0
 
 
+def find_available_base_port(num_ports: int, start: int = 8000, end: int = 30000, step: int = 10) -> int:
+    """寻找一段连续空闲的端口，返回起始端口号。若全部占用则抛出 RuntimeError。"""
+    for base in range(start, end + 1, step):
+        all_free = True
+        for i in range(num_ports):
+            p = base + i
+            if p > 65535:
+                all_free = False
+                break
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                r = sock.connect_ex(('localhost', p))
+                sock.close()
+                if r == 0:  # 端口被占用
+                    all_free = False
+                    break
+            except Exception:
+                all_free = False
+                break
+        if all_free:
+            return base
+    raise RuntimeError(f'No available port range found in [{start}, {end}] for {num_ports} consecutive ports')
+
+
 def get_ref_config(key):
     with open('tuner_conf/conf.json', 'r') as f:
         tuner_conf = json.load(f)

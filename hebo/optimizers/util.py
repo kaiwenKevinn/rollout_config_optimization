@@ -64,18 +64,18 @@ def ensure_hard_constr(samples, max_sequence_length):
                 samples.loc[invalid, 'pipeline_parallel_size'] = new_pp
         except Exception:
             pass
-    # enable_chunked_prefill 等固定为 True，临时添加以便 update_max_num_batched_tokens 能执行
-    if 'enable_chunked_prefill' not in samples.columns:
-        samples['enable_chunked_prefill'] = True
-        samples['enable_prefix_caching'] = True
-        samples['disable_custom_all_reduce'] = True
-        samples['use_v2_block_manager'] = True
-    samples = samples.apply(update_max_num_batched_tokens, axis=1, max_sequence_length=max_sequence_length)
-    samples.loc[samples['max_num_batched_tokens'] < samples['max_num_seqs'], 'max_num_seqs'] = samples['max_num_batched_tokens']
-    # 移除临时添加的列
-    drop_cols = [c for c in ['enable_chunked_prefill', 'enable_prefix_caching', 'disable_custom_all_reduce', 'use_v2_block_manager'] if c in samples.columns]
-    if drop_cols:
-        samples = samples.drop(columns=drop_cols)
+    # max_num_batched_tokens / max_num_seqs 约束：仅当样本包含这两列时执行（调优 tp,pp,block_size 时无此列）
+    if 'max_num_batched_tokens' in samples.columns and 'max_num_seqs' in samples.columns:
+        if 'enable_chunked_prefill' not in samples.columns:
+            samples['enable_chunked_prefill'] = True
+            samples['enable_prefix_caching'] = True
+            samples['disable_custom_all_reduce'] = True
+            samples['use_v2_block_manager'] = True
+        samples = samples.apply(update_max_num_batched_tokens, axis=1, max_sequence_length=max_sequence_length)
+        samples.loc[samples['max_num_batched_tokens'] < samples['max_num_seqs'], 'max_num_seqs'] = samples['max_num_batched_tokens']
+        drop_cols = [c for c in ['enable_chunked_prefill', 'enable_prefix_caching', 'disable_custom_all_reduce', 'use_v2_block_manager'] if c in samples.columns]
+        if drop_cols:
+            samples = samples.drop(columns=drop_cols)
     return samples
 
 

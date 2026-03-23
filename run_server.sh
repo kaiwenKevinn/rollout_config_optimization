@@ -57,7 +57,7 @@ echo  python -m clients.api_server \
     --tensor-parallel-size ${tp_size} \
     --pipeline-parallel-size ${pp_size} \
     --block-size ${block_size} \
-    --gpu-memory-utilization 0.9\
+    --gpu-memory-utilization 0.95\
     --trust-remote-code\
     --enforce-eager\
     --disable-async-output-proc\
@@ -75,7 +75,7 @@ python -m clients.api_server \
     --tensor-parallel-size ${tp_size} \
     --pipeline-parallel-size ${pp_size} \
     --block-size ${block_size} \
-    --gpu-memory-utilization 0.9\
+    --gpu-memory-utilization 0.95\
     --trust-remote-code\
     --enforce-eager\
     --disable-async-output-proc\

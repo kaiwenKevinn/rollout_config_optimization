@@ -64,22 +64,25 @@ OLD_IFS="$IFS"
 IFS=','
 read -ra PRE_CLEAN_PORTS <<< "$port"
 IFS="$OLD_IFS"
-for p in "${PRE_CLEAN_PORTS[@]}"; do
-    if [ -n "$p" ] && [ "$p" -gt 0 ] 2>/dev/null; then
-        pids=$(lsof -t -i:${p} 2>/dev/null)
-        if [ -n "$pids" ]; then
-            echo "Pre-killing processes on port $p (PIDs: $pids) to avoid port conflict"
-            echo "$pids" | xargs kill -9 2>/dev/null || true
-            sleep 2
-        fi
-    fi
-done
-# 额外清理可能残留的 api_server 进程
+# 先杀 api_server，再按端口杀
 for pid in $(pgrep -f "clients.api_server" 2>/dev/null); do
     echo "Pre-killing stale api_server pid: $pid"
     kill -9 $pid 2>/dev/null || true
 done
-sleep 2
+sleep 3
+for p in "${PRE_CLEAN_PORTS[@]}"; do
+    if [ -n "$p" ] && [ "$p" -gt 0 ] 2>/dev/null; then
+        pids=$(lsof -t -i:${p} 2>/dev/null)
+        if [ -n "$pids" ]; then
+            echo "Pre-killing processes on port $p (PIDs: $pids)"
+            echo "$pids" | xargs kill -9 2>/dev/null || true
+            sleep 3
+        fi
+    fi
+done
+# 等待端口释放（含 TIME_WAIT，约 2*MSL）
+# 注：bo_scoot 已改用动态端口段，大幅降低 TIME_WAIT 冲突
+sleep 5
 echo "Port pre-clean done."
 
 echo "server start!"
