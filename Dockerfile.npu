@@ -1,0 +1,83 @@
+# NPU 910B 配置优化项目 Dockerfile
+# 基于EulerOS 2.0基础镜像
+
+FROM openeuler/openeuler:20.03-lts-sp1
+
+# 设置环境变量
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
+# 安装基础依赖（EulerOS使用yum包管理器）
+RUN yum update -y && \
+    yum install -y \
+    gcc \
+    gcc-c++ \
+    make \
+    cmake \
+    git \
+    wget \
+    curl \
+    vim \
+    htop \
+    python3 \
+    python3-devel \
+    python3-pip \
+    which \
+    tar \
+    gzip \
+    openssl-devel \
+    libffi-devel \
+    && yum clean all
+
+# 创建工作目录
+WORKDIR /workspace
+
+# 升级pip并安装基础Python包
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
+# 安装Python依赖（基础包）
+COPY requirements.txt .
+RUN pip3 install --upgrade pip
+RUN pip3 install setuptools wheel psutil
+
+# EulerOS特定配置
+# 安装开发工具集
+RUN yum groupinstall -y "Development Tools" && \
+    yum install -y epel-release
+
+# 安装额外的系统依赖
+RUN yum install -y \
+    libgl1-mesa-glx \
+    mesa-libGL \
+    libSM \
+    libXext \
+    libXrender \
+    glibc-static \
+    && yum clean all
+
+# 注意：以下步骤需要根据实际环境调整
+# 1. 安装Ascend CANN驱动（需要挂载或复制驱动文件）
+# 2. 安装NPU版本的PyTorch
+# 3. 编译安装vllm-ascend
+
+# 复制项目代码
+COPY . .
+
+# 设置用户权限
+RUN chown -R root:root /workspace
+
+# 暴露端口（如果需要）
+EXPOSE 8000-8010
+
+# 设置环境变量
+ENV PYTHONPATH=/workspace:$PYTHONPATH
+ENV ASCEND_HOME=/usr/local/Ascend
+ENV PATH=$ASCEND_HOME/bin:$PATH
+ENV LD_LIBRARY_PATH=$ASCEND_HOME/lib64:$LD_LIBRARY_PATH
+
+# EulerOS特定环境变量
+ENV PYTHONIOENCODING=utf-8
+ENV LC_CTYPE=en_US.UTF-8
+
+# 默认启动命令
+CMD ["/bin/bash"]
