@@ -1,0 +1,77 @@
+{
+  "model_name": "/mnt/data1/kwchen/hugging_face_model/Qwen/Qwen3-32B/models--Qwen--Qwen3-32B/snapshots/9216db5781bf21249d130ec9da846c4624c16137",
+  "thresholds": {
+    "short": 10000,
+    "medium": 20000,
+    "long": 30000
+  },
+  "total_thresholds": {
+    "short": 10000,
+    "medium": 20000,
+    "long": 30000
+  },
+  "distribution": {
+    "total_sequences": 198,
+    "by_category": {
+      "short": 198
+    },
+    "by_subject": {
+      "Physics": 86,
+      "Chemistry": 93,
+      "Biology": 19
+    },
+    "input_token_stats": {
+      "min": 84.0,
+      "max": 2811.0,
+      "mean": 258.5,
+      "std": 214.44077494636124,
+      "p50": 223.0,
+      "p90": 380.50000000000006,
+      "p99": 804.1200000000001
+    },
+    "estimated_output_stats": {
+      "min": 128.0,
+      "max": 128.0,
+      "mean": 128.0,
+      "std": 0.0,
+      "p50": 128.0,
+      "p90": 128.0,
+      "p99": 128.0
+    },
+    "thresholds": {
+      "short": 10000,
+      "medium": 20000,
+      "long": 30000
+    },
+    "actual_output_stats": {
+      "min": 0.0,
+      "max": 40000.0,
+      "mean": 34190.681818181816,
+      "std": 12627.177053009644,
+      "p50": 40000.0,
+      "p90": 40000.0,
+      "p99": 40000.0
+    },
+    "actual_total_stats": {
+      "min": 154.0,
+      "max": 40905.0,
+      "mean": 34449.181818181816,
+      "std": 12585.271844552488,
+      "p50": 40198.5,
+      "p90": 40345.9,
+      "p99": 40640.95
+    },
+    "by_actual_category": {
+      "short": 27,
+      "extra_long": 163,
+      "medium": 8
+    },
+    "completed_count": 198
+  },
+  "sequences": [],
+  "bucket_info": {
+    "sequence_count": 0,
+    "max_tokens": 40905,
+    "step": 10226.25
+  }
+}
