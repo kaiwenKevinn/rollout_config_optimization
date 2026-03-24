@@ -17,7 +17,10 @@
 import re
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,5"
+# NPU环境下的设备设置
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,5"  # 注释掉CUDA设置
+# 如果需要指定NPU设备，可以取消下面的注释
+# os.environ["ASCEND_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
 import torch
 
 import argparse
@@ -238,7 +241,7 @@ def run_single_config(cfg: Dict, gpu_nums: int, res_dir_path: str, args,
     time.sleep(5)
 
     combination = config_to_combination(cfg)
-    run_benchmark_pipeline(combination, gpu_nums, args)
+    run_benchmark_pipeline(combination, device_nums, args)
 
     vllm_files = []
     for root, _, files in os.walk(res_dir_path):
@@ -271,8 +274,8 @@ def run_single_config(cfg: Dict, gpu_nums: int, res_dir_path: str, args,
     }
 
 
-def parse_gpu_num_from_total_resource(total_resource: str) -> Optional[int]:
-    """从 total_resource 解析 GPU 数量，如 4A800、8A800_mobo -> 4 或 8"""
+def parse_device_num_from_total_resource(total_resource: str) -> Optional[int]:
+    """从 total_resource 解析设备数量，如 4A800、8A800_mobo、4NPU910B -> 4 或 8"""
     m = re.match(r'^(\d+)', total_resource)
     if m:
         return int(m.group(1))
@@ -281,16 +284,52 @@ def parse_gpu_num_from_total_resource(total_resource: str) -> Optional[int]:
 
 def main(args):
     print(f"枚举配置测试参数: {args}")
-    # 优先使用 --total_resource 中解析的 GPU 数量，否则使用可见 GPU 数
-    gpu_nums_from_arg = parse_gpu_num_from_total_resource(args.total_resource)
-    visible_count = torch.cuda.device_count()
-    if gpu_nums_from_arg is not None:
-        gpu_nums = min(gpu_nums_from_arg, visible_count)
-        if gpu_nums < visible_count:
-            print(f"根据 --total_resource {args.total_resource} 限制使用 {gpu_nums} 个 GPU（可见 {visible_count} 个）")
+    # 优先使用 --total_resource 中解析的设备数量，否则使用可见设备数
+    device_nums_from_arg = parse_device_num_from_total_resource(args.total_resource)
+    
+    # 检查可用设备类型（优先NPU，其次CUDA）
+    visible_npu_count = 0
+    visible_cuda_count = 0
+    
+    # 检查NPU设备
+    try:
+        # 尝试导入NPU相关库
+        import torch_npu  # noqa: F401
+        visible_npu_count = torch.npu.device_count()
+        print(f"检测到 {visible_npu_count} 个NPU设备")
+    except ImportError:
+        print("未检测到NPU支持")
+    
+    # 检查CUDA设备
+    try:
+        visible_cuda_count = torch.cuda.device_count()
+        if visible_cuda_count > 0:
+            print(f"检测到 {visible_cuda_count} 个CUDA设备")
+    except Exception:
+        print("CUDA设备检测失败")
+    
+    # 确定使用的设备类型和数量
+    if visible_npu_count > 0:
+        # 优先使用NPU
+        device_type = "NPU"
+        visible_count = visible_npu_count
+    elif visible_cuda_count > 0:
+        # 回退到CUDA
+        device_type = "CUDA" 
+        visible_count = visible_cuda_count
     else:
-        gpu_nums = visible_count
-    assert gpu_nums % 2 == 0 or gpu_nums == 1
+        # 没有可用设备
+        raise RuntimeError("未检测到任何可用的计算设备（NPU或CUDA）")
+    
+    if device_nums_from_arg is not None:
+        device_nums = min(device_nums_from_arg, visible_count)
+        if device_nums < visible_count:
+            print(f"根据 --total_resource {args.total_resource} 限制使用 {device_nums} 个 {device_type} 设备（可见 {visible_count} 个）")
+    else:
+        device_nums = visible_count
+        print(f"使用全部 {device_nums} 个 {device_type} 设备")
+    
+    assert device_nums % 2 == 0 or device_nums == 1
 
     # 确保在 SCOOT 根目录执行（以便 import bo_scoot、utils）
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -394,7 +433,7 @@ def main(args):
     else:
         tune_params = [p.strip() for p in args.tune_params.split(',') if p.strip()]
         configs = generate_enum_configs(
-            gpu_nums, max_sequence_length, min_world_size, args.max_configs, tune_params=tune_params
+            device_nums, max_sequence_length, min_world_size, args.max_configs, tune_params=tune_params
         )
         print(f"自动枚举得到 {len(configs)} 个有效配置 (调优参数: {tune_params})")
 

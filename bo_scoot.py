@@ -1,5 +1,8 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,5"
+# NPU环境下的设备设置
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,5"  # 注释掉CUDA设置
+# 如果需要指定NPU设备，可以取消下面的注释
+# os.environ["ASCEND_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
 
 import torch
 import argparse
